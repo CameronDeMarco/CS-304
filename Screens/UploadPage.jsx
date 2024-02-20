@@ -1,23 +1,26 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, Button, TextInput, StyleSheet, Pressable , FlatList} from 'react-native';
 import { useTheme } from '@react-navigation/native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { RawButton, ScrollView } from 'react-native-gesture-handler';
 import symbolicateStackTrace from 'react-native/Libraries/Core/Devtools/symbolicateStackTrace';
 
-const ITEMLIST = [
-    {
-        fileName:"test.png"
-    },
-    {
-        fileName:"test2.png"
-    }
-]
 
 const UploadPage = () => {
     const theme = useTheme();
+    const [ITEMLIST, setItem] = useState([]);
+
+    function addFile(){
+        setItem([...ITEMLIST, {fileName:"test.png"}]);
+    }
+
+    function selectMedia(){
+        //TODO implement camera/galery options...
+        //If user adds media call add file.
+    }
 
     return (
-        <View style={{padding:15}}>
+        <ScrollView style={{padding:15}}>
             <View styles={styles.field}>
                 <Text style={styles.textField}>Title</Text>
                 <TextInput maxLength={50} style={[styles.textInput, styles.androidShadow]}></TextInput>
@@ -28,26 +31,27 @@ const UploadPage = () => {
             </View>
             <Pressable 
             onPressOut={()=>{
-
+                addFile();
+                selectMedia();
             }}>
                 <Text style={{color:"#3CCDB7", fontSize:19, width: '100%', height: 75, textAlignVertical:'center', textAlign:'center'}}>+ Add Media</Text>
             </Pressable>
             <FlatList 
+                scrollEnabled={false}
                 data={ITEMLIST}
                 renderItem={({item}) => <ResourceCard fileName={item.fileName}/>}
             />
             <View style={{paddingTop:15, width: 100, height: 100}}>
                 <Button title="Upload" disabled />
             </View>
-        </View>
+        </ScrollView>
     
     )
 }
 
 const styles = StyleSheet.create({
     field:{
-        margin: 500,
-        padding: 50,
+        marginBottom: 180
     },
     textField:{
         fontSize:17
@@ -81,8 +85,11 @@ export default UploadPage;
 
 const ResourceCard = ({fileName}) => {
     return(
-        <View style={{marginHorizontal: 30, marginVertical:10, backgroundColor:"#E6E6E6", borderWidth:.25}}>
+        <View style={{flexDirection:"row", justifyContent:"space-between", flex:1, marginHorizontal: 30, marginVertical:8, backgroundColor:"#E6E6E6", borderWidth:.25}}>
             <Text style={{padding:15}}>{fileName}</Text>
+            <Pressable>
+                <MaterialCommunityIcons.Button name="image-remove" size={24} color="black" backgroundColor={"#00000000"} style={{height:"100%"}}/>
+            </Pressable>
         </View>
     )
 }

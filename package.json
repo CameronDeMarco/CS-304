@@ -9,9 +9,10 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@ant-design/icons": "^5.3.0",
     "@expo/vector-icons": "^14.0.0",
     "@expo/webpack-config": "^19.0.1",
-    "@react-native-async-storage/async-storage": "^1.19.3",
+    "@react-native-async-storage/async-storage": "^1.22.1",
     "@react-native-clipboard/clipboard": "^1.12.1",
     "@react-native-community/datetimepicker": "^7.6.1",
     "@react-native-masked-view/masked-view": "0.2.9",

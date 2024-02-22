@@ -17,6 +17,7 @@ const TabNavigator = () => {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
+        headerShown: false,
         tabBarIcon: ({ color, size }) => {
           let iconName;
 
@@ -76,9 +77,9 @@ export default function App() {
                   name="main"
                   component={ TabNavigator }
                   options={() => ({
-                    headerLeft: () => ( <View style={{ paddingRight: 10 }}>
-                    <Switch value={isDarkMode} thumbColor={switchThumbColor} trackColor={switchTrackColor} onValueChange={toggleDarkMode} />
-                  </View> ),
+                  //   headerLeft: () => ( <View style={{ paddingRight: 10 }}>
+                  //   <Switch value={isDarkMode} thumbColor={switchThumbColor} trackColor={switchTrackColor} onValueChange={toggleDarkMode} />
+                  // </View> ),
                     headerTitle: 'Activity App',
                     headerStyle: {
                       backgroundColor: primaryColor,

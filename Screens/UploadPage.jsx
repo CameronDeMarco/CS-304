@@ -14,6 +14,11 @@ const UploadPage = () => {
         setItem([...ITEMLIST, {fileName:fileName, uri:uri}]);
     }
 
+    const deleteMediaItem = (item) => {
+        console.log("delete " + item.fileName);
+        setItem(ITEMLIST.filter((search) => search.fileName !==  item.fileName));
+    }
+
     async function openCamera(){
         let result = await ImagePicker.launchCameraAsync();
         if(!result.canceled){
@@ -67,7 +72,7 @@ const UploadPage = () => {
             <FlatList 
                 scrollEnabled={false}
                 data={ITEMLIST}
-                renderItem={({item}) => <ResourceCard fileName={item.fileName} uri={item.uri}/>}
+                renderItem={({item}) => <ResourceCard fileName={item.fileName} uri={item.uri} onDelete={() => {deleteMediaItem(item)}}/>}
             />
             <View style={{paddingTop:15, width: 100, height: 100}}>
                 <Button title="Upload" disabled />
@@ -111,20 +116,19 @@ const styles = StyleSheet.create({
 
 export default UploadPage;
 
-const ResourceCard = ({fileName, uri}) => {
+const ResourceCard = ({fileName, uri, onDelete}) => {
     let resourceName;
-    if(fileName.length > 20){
-        resourceName = fileName.substring(0,20) + "...";
+    if(fileName.length > 16){
+        resourceName = fileName.substring(0,16) + "...";
     }else{
         resourceName = fileName;
     }
     return(
         <View style={{flexDirection:"row", justifyContent:"flex-start", flex:1, marginHorizontal: 30, marginVertical:8, backgroundColor:"#E6E6E6"}}>
             <Image source={{uri:uri}} width={75} height={75}/>
-            <Text style={{padding:15, textAlignVertical:"center"}}>{resourceName}</Text>
-            <Pressable>
-                <MaterialCommunityIcons.Button name="image-remove" size={24} color="black" backgroundColor={"#00000000"} style={{height:"100%"}}/>
-            </Pressable>
+            <Text style={{padding:15, textAlignVertical:"center", flex:1}}>{resourceName}</Text>
+            
+            <MaterialCommunityIcons.Button onPress={onDelete} name="image-remove" size={24} color="black" backgroundColor={"#00000000"} style={{height:"100%"}}/>
         </View>
     )
 }

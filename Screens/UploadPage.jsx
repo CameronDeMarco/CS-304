@@ -91,7 +91,7 @@ const ResourceCard = ({fileName, uri, onDelete}) => {
             <Image source={{uri:uri}} width={75} height={75}/>
             <Text style={{padding:15, textAlignVertical:"center", flex:1}}>{resourceName}</Text>
             
-            <MaterialCommunityIcons.Button onPress={onDelete} name="image-remove" size={24} color="black" backgroundColor={"#00000000"} style={{height:"100%"}}/>
+            <MaterialCommunityIcons.Button onPress={onDelete} name="image-remove" size={24} color="black" backgroundColor={"#00000000"} underlayColor={"#ff424280"} style={{height:"100%"}}/>
         </View>
     )
 }

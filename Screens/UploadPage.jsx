@@ -2,40 +2,40 @@ import React, { useState } from 'react';
 import { View, Text, Button, TextInput, StyleSheet, Pressable , FlatList, Image} from 'react-native';
 import { useTheme } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { RawButton, ScrollView } from 'react-native-gesture-handler';
+import { ScrollView } from 'react-native-gesture-handler';
 import * as ImagePicker from 'expo-image-picker';
 
 
 const UploadPage = () => {
     const theme = useTheme();
-    const [ITEMLIST, setItem] = useState([]);
+    const [mediaRefrences, setMediaRefrences] = useState([]);
 
-    function addFile(fileName, uri){
-        setItem([...ITEMLIST, {fileName:fileName, uri:uri}]);
+    function addMedia(fileName, uri){
+        setMediaRefrences([...mediaRefrences, {fileName:fileName, uri:uri}]);
     }
 
-    const deleteMediaItem = (item) => {
-        console.log("delete " + item.fileName);
-        setItem(ITEMLIST.filter((search) => search.fileName !==  item.fileName));
+    const deleteMedia = (mediaRefrence) => {
+        console.log("delete " + mediaRefrence.fileName);
+        setMediaRefrences(mediaRefrences.filter((search) => search.fileName !==  mediaRefrence.fileName));
     }
 
     async function openCamera(){
         let result = await ImagePicker.launchCameraAsync();
         if(!result.canceled){
             console.log(result.assets[0].fileName + " selected.");
-            addFile(test=result.assets[0].fileName, result.assets[0].uri);
+            addMedia(result.assets[0].fileName, result.assets[0].uri);
             console.log(result.assets[0]);
         }else{
             console.log("Media selection cancled.");
         }
     }
 
-    async function selectMedia(){
+    async function openGallery(){
         let result = await ImagePicker.launchImageLibraryAsync();
 
         if(!result.canceled){
             console.log(result.assets[0].fileName + " selected.");
-            addFile(test=result.assets[0].fileName, result.assets[0].uri);
+            addMedia(test=result.assets[0].fileName, result.assets[0].uri);
             console.log(result.assets[0]);
         }else{
             console.log("Media selection cancled.");
@@ -59,20 +59,20 @@ const UploadPage = () => {
                 onPressOut={()=>{
                     openCamera();
                 }}>
-                    <Text style={{color:"#3CCDB7", width:"100%", fontSize:19, marginBottom:25, textAlignVertical:'center'}}>+ Camera</Text>
+                    <Text styles={styles.mediaButton}>+ Camera</Text>
                 </Pressable>
                 <Pressable 
                 style={{marginHorizontal:15}}
                 onPressOut={()=>{
-                    selectMedia();
+                    openGallery();
                 }}>
-                <Text style={{color:"#3CCDB7", width:"100%", fontSize:19, marginBottom:25, textAlignVertical:'center'}}>+ Gallery</Text>
+                <Text styles={styles.mediaButton}>+ Gallery</Text>
                 </Pressable>
             </View>
             <FlatList 
                 scrollEnabled={false}
-                data={ITEMLIST}
-                renderItem={({item}) => <ResourceCard fileName={item.fileName} uri={item.uri} onDelete={() => {deleteMediaItem(item)}}/>}
+                data={mediaRefrences}
+                renderItem={({item}) => <ResourceCard fileName={item.fileName} uri={item.uri} onDelete={() => {deleteMedia(item)}}/>}
             />
             <View style={{paddingTop:15, width: 100, height: 100}}>
                 <Button title="Upload" disabled />
@@ -111,6 +111,13 @@ const styles = StyleSheet.create({
         elevation: 5,
         zIndex: 99,
         shadowColor:'black',
+    },
+    mediaButton:{
+        color:"#3CCDB7",
+        width:"100%",
+        fontSize:19,
+        marginBottom:25,
+        textAlignVertical:'center'
     }
 });
 

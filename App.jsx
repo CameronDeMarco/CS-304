@@ -1,14 +1,31 @@
 import AccountPage from './Screens/AccountPage';
 import FeedPage from './Screens/FeedPage';
 import UploadPage from './Screens/UploadPage';
+import Login from './Screens/Login';
+import Register from './Screens/Register';
 import React from 'react';
-import { StyleSheet, View, Switch } from 'react-native';
-import { NavigationContainer, useTheme } from '@react-navigation/native';
+import { StyleSheet, View, Switch, Button } from 'react-native';
+import { NavigationContainer, useTheme, useNavigation } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Feather } from '@expo/vector-icons';
 import { primaryColor } from './Components/Color';
 import { useDarkMode  } from './Components/Themes';
+
+const LoginButton = () => {
+  const navigation = useNavigation();
+
+  return (
+    <View>
+      <Button
+        title="Login"
+        color='#4C6E95'
+        onPress={() => navigation.navigate('Login')}
+      />
+    </View>
+  );
+}
+
 
 const Tab = createBottomTabNavigator();
 
@@ -60,6 +77,14 @@ const TabNavigator = () => {
           tabBarLabel: 'Account',
         }}
       />
+      {/* <Tab.Screen
+        name="Login"
+        theme={theme}
+        component={Login}
+        options={{
+          tabBarLabel: 'Login',
+        }}
+      /> */}
     </Tab.Navigator>
   );
 };
@@ -77,9 +102,29 @@ export default function App() {
                   name="main"
                   component={ TabNavigator }
                   options={() => ({
-                  //   headerLeft: () => ( <View style={{ paddingRight: 10 }}>
-                  //   <Switch value={isDarkMode} thumbColor={switchThumbColor} trackColor={switchTrackColor} onValueChange={toggleDarkMode} />
-                  // </View> ),
+                    headerRight: () => <LoginButton />,
+                    headerTitle: 'Activity App',
+                    headerStyle: {
+                      backgroundColor: primaryColor,
+                    },
+                    headerTintColor: 'white',
+                  })}
+                />
+                <Stack.Screen
+                  name="Login"
+                  component={ Login }
+                  options={() => ({
+                    headerTitle: 'Activity App',
+                    headerStyle: {
+                      backgroundColor: primaryColor,
+                    },
+                    headerTintColor: 'white',
+                  })}
+                />
+                 <Stack.Screen
+                  name="Register"
+                  component={ Register }
+                  options={() => ({
                     headerTitle: 'Activity App',
                     headerStyle: {
                       backgroundColor: primaryColor,

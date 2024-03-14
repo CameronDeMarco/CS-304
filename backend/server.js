@@ -6,6 +6,10 @@ const app = express();
 app.use(express());
 app.use(express.json());
 
+const UserRoutes = require('./api/user')
+
+app.use('/api/user', UserRoutes)
+
 
 
 app.listen(PORT, () => {

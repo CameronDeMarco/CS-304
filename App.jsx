@@ -3,7 +3,7 @@ import FeedPage from './Screens/FeedPage';
 import UploadPage from './Screens/UploadPage';
 import Login from './Screens/Login';
 import Register from './Screens/Register';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Switch, Button } from 'react-native';
 import { NavigationContainer, useTheme, useNavigation } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -11,17 +11,54 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Feather } from '@expo/vector-icons';
 import { primaryColor } from './Components/Color';
 import { useDarkMode  } from './Components/Themes';
+import AsyncStorage from '@react-native-async-storage/async-storage'; 
 
 const LoginButton = () => {
   const navigation = useNavigation();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const checkLoginStatus = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      setIsLoggedIn(!!token); // Update login status based on token existence
+    } catch (error) {
+      console.error("Error checking login status:", error);
+    }
+  };
+
+  useEffect(() => {
+    checkLoginStatus();
+  }, [checkLoginStatus]);
+
+
+  const handleLogin = () => {
+    navigation.navigate("Login");
+  };
+
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.removeItem("token");
+      setIsLoggedIn(false);
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
+  };
 
   return (
     <View>
-      <Button
+      {!isLoggedIn ? (
+        <Button
         title="Login"
         color='#4C6E95'
-        onPress={() => navigation.navigate('Login')}
+        onPress={handleLogin}
       />
+      ) : (
+        <Button
+        title="Logout"
+        color='#4C6E95'
+        onPress={handleLogout}
+      />
+      )}
     </View>
   );
 }
@@ -103,7 +140,7 @@ export default function App() {
                   component={ TabNavigator }
                   options={() => ({
                     headerRight: () => <LoginButton />,
-                    headerTitle: 'Activity App',
+                    headerTitle: 'Roamr',
                     headerStyle: {
                       backgroundColor: primaryColor,
                     },
@@ -114,18 +151,18 @@ export default function App() {
                   name="Login"
                   component={ Login }
                   options={() => ({
-                    headerTitle: 'Activity App',
+                    headerTitle: 'Login',
                     headerStyle: {
                       backgroundColor: primaryColor,
                     },
                     headerTintColor: 'white',
                   })}
                 />
-                 <Stack.Screen
+                <Stack.Screen
                   name="Register"
                   component={ Register }
                   options={() => ({
-                    headerTitle: 'Activity App',
+                    headerTitle: 'Register',
                     headerStyle: {
                       backgroundColor: primaryColor,
                     },

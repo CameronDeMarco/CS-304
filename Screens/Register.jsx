@@ -1,17 +1,40 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import axios from 'axios';
 
 const Register = ({ navigation }) => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [userName, setUsername] = useState('');
+  const [username, setUsername] = useState('');
   const [dob, setDob] = useState('');
 
-  const handleCreateAccount = () => {
-
-    navigation.navigate('Home');
+  const handleCreateAccount = async () => {
+    try {
+      const response = await axios.post('http://10.0.0.231:5001/api/user/register', {
+        firstName,
+        lastName,
+        username,
+        email,
+        password,
+        dob
+      });
+      console.log(response.data); // Handle success response
+      navigation.navigate('Login');
+    } catch (error) {
+      console.error('Error logging in:', error);
+      if (error.response) {
+        // Server responded with an error status code
+        Alert.alert('Error', error.response.data.message || 'Failed to register. Please try again later.');
+      } else if (error.request) {
+        // The request was made but no response was received
+        Alert.alert('Error', 'Network Error. Please check your internet connection.');
+      } else {
+        // Something else happened
+        Alert.alert('Error', 'An unexpected error occurred. Please try again later.');
+      }
+    }
   };
 
   return (
@@ -31,6 +54,12 @@ const Register = ({ navigation }) => {
       />
       <TextInput
         style={styles.input}
+        placeholder="Username"
+        value={username}
+        onChangeText={(text) => setUsername(text)}
+      />
+      <TextInput
+        style={styles.input}
         placeholder="Email"
         value={email}
         onChangeText={(text) => setEmail(text)}
@@ -41,12 +70,6 @@ const Register = ({ navigation }) => {
         secureTextEntry
         value={password}
         onChangeText={(text) => setPassword(text)}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Username"
-        value={userName}
-        onChangeText={(text) => setUsername(text)}
       />
       <TextInput
         style={styles.input}

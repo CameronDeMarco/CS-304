@@ -4,7 +4,7 @@ import UploadPage from './Screens/UploadPage';
 import Login from './Screens/Login';
 import Register from './Screens/Register';
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Switch, Button } from 'react-native';
+import { StyleSheet, View, Switch, Button, Alert } from 'react-native';
 import { NavigationContainer, useTheme, useNavigation } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -39,6 +39,7 @@ const LoginButton = () => {
     try {
       await AsyncStorage.removeItem("token");
       setIsLoggedIn(false);
+      Alert.alert(`Successfully logged out`);
     } catch (error) {
       console.error("Error logging out:", error);
     }

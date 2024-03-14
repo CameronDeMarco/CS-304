@@ -50,6 +50,7 @@ router.post('/login', async (req, res) => {
   
       // Send JWT token to the client
       res.status(200).json({ token });
+      console.log("successfully logged in as", user.username);
     } catch (error) {
       console.error('Error logging in:', error);
       res.status(500).json({ message: 'Server Error' });

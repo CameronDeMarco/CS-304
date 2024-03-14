@@ -25,7 +25,7 @@ const Login = ({ navigation }) => {
   const handleLogin = async () => {
     try {
       // Send login request to backend
-      const response = await axios.post('http://10.0.0.231:5001/api/user/login', {
+      const response = await axios.post('http://10.20.134.84:5001/api/user/login', {
         username,
         password
       });
@@ -34,6 +34,8 @@ const Login = ({ navigation }) => {
       if (response && response.data && response.data.token) {
         // Store token securely
         await AsyncStorage.setItem('token', response.data.token);
+
+        Alert.alert(`Successfully logged in as ${username}`);
         
         // Navigate to another screen
         navigation.navigate('Feed');

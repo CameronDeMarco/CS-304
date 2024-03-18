@@ -100,19 +100,6 @@ useEffect(() => {
     <View style={styles.postContainer}>
       <Text style={styles.username}>@{item.username}</Text>
       <View style={styles.carouselContainer}>
-        {/* <Carousel
-        loop
-        width={Dimensions.get('window').width}
-        height={Dimensions.get('window').width / 1.6}
-        autoPlay={false}
-        data={item.images}
-        scrollAnimationDuration={800}
-        renderItem={({ item: image }) => (
-          <View style={{ flex: 1, alignItems: 'center' }}>
-            <Image source={image} style={styles.postImage} />
-          </View>
-        )}
-      /> */}
       <Carousel
         loop
         width={Dimensions.get('window').width}
@@ -122,6 +109,9 @@ useEffect(() => {
         scrollAnimationDuration={800}
         gestureActiveMultiplier={10} // Adjust this value (default is 1)
         gestureVelocityImpact={0.1} // Adjust this value (default is 0.1)
+        panGestureHandlerProps={{
+          activeOffsetX: [-10, 10],
+        }}
         renderItem={({ item: image }) => (
           <View style={{ flex: 1, alignItems: 'center' }}>
             <Image source={image} style={styles.postImage} />

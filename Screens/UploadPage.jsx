@@ -1,14 +1,18 @@
 import React, { useState } from 'react';
-import { View, Text, Button, TextInput, StyleSheet, Pressable , FlatList, Image} from 'react-native';
+import { View, Text, Button, TextInput, StyleSheet, Pressable , FlatList, Image, Alert} from 'react-native';
 import { useTheme } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { RawButton, ScrollView } from 'react-native-gesture-handler';
 import * as ImagePicker from 'expo-image-picker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 
 
 const UploadPage = () => {
     const theme = useTheme();
     const [ITEMLIST, setItem] = useState([]);
+    const[title, setTitle] = useState([]);
+    const[content, setContent] = useState([]);
 
     function addFile(fileName, uri){
         setItem([...ITEMLIST, {fileName:fileName, uri:uri}]);
@@ -30,6 +34,36 @@ const UploadPage = () => {
         }
     }
 
+    const uploadPost = async () => {
+        let token;
+        try{
+            token = await AsyncStorage.getItem('token');
+            console.log("token: " + token);
+        }catch(error){
+            console.log(error);
+        }
+
+        try{
+            const uploadResponse = await axios.post('http://10.0.0.30:5001/api/post/upload', {
+                //body
+                username:"temp", 
+                title,
+                content,
+                token: token
+            });
+        }catch(error){
+            console.log(error);
+            console.log(error.response.data);
+            if(error.responce){
+                
+            }else if(error.request){
+                Alert.alert('Error', 'Network Error. Please check your internet connection.');
+            }else{
+                console.log('Error', error.message);
+            }
+        }
+    }
+
     async function selectMedia(){
         let result = await ImagePicker.launchImageLibraryAsync();
 
@@ -46,11 +80,19 @@ const UploadPage = () => {
         <ScrollView style={{padding:15}}>
             <View styles={styles.field}>
                 <Text style={styles.textField}>Title</Text>
-                <TextInput maxLength={50} style={[styles.textInput, styles.androidShadow]}></TextInput>
+                <TextInput maxLength={50} 
+                    style={[styles.textInput, styles.androidShadow]} 
+                    onChangeText={(title) => setTitle(title)}
+                />
             </View>
             <View styles={styles.field}>
                 <Text style={styles.textField}>Description</Text>
-                <TextInput maxLength={150} style={[styles.multiTextInput, styles.androidShadow]} multiline></TextInput>
+                <TextInput
+                    style={[styles.multiTextInput, styles.androidShadow]} 
+                    onChangeText={(content) => setContent(content)}
+                    maxLength={150} 
+                    multiline
+                />
             </View>
             <Text style={{fontWeight:"bold", fontSize:22, textDecorationLine:"underline", textAlign:'center', marginTop:20, marginBottom:5}}>Media</Text>
             <View style={{flexDirection:"row", justifyContent:"center"}}>
@@ -75,7 +117,7 @@ const UploadPage = () => {
                 renderItem={({item}) => <ResourceCard fileName={item.fileName} uri={item.uri} onDelete={() => {deleteMediaItem(item)}}/>}
             />
             <View style={{paddingTop:15, width: 100, height: 100}}>
-                <Button title="Upload" disabled />
+                <Button title="Upload" onPress={uploadPost} />
             </View>
         </ScrollView>
     

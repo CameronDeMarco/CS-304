@@ -5,6 +5,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { RawButton, ScrollView } from 'react-native-gesture-handler';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import DropDown  from '../Components/DropdownSearch';
 import axios from 'axios';
 
 
@@ -94,6 +95,7 @@ const UploadPage = () => {
                     multiline
                 />
             </View>
+            <DropDown />
             <Text style={{fontWeight:"bold", fontSize:22, textDecorationLine:"underline", textAlign:'center', marginTop:20, marginBottom:5}}>Media</Text>
             <View style={{flexDirection:"row", justifyContent:"center"}}>
                 <Pressable

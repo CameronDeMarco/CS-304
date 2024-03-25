@@ -4,11 +4,9 @@ const jwt = require('jsonwebtoken');
 
 module.exports.authenticate = function (req, res, next) {
     try{
-        console.log(req.body);
         const {token} = req.body;
-        console.log(token);
-        console.log("token: " + token);
-        jwt.verify(token, 'your-secret-key');
+        const test = jwt.verify(token, 'your-secret-key');
+        req.body.token = test;
         next();
     }catch(error){
         console.error("error authorizig user: " + error);

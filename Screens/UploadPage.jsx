@@ -5,7 +5,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { RawButton, ScrollView } from 'react-native-gesture-handler';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import DropDown  from '../Components/DropdownSearch';
+import DropDownSearch  from '../Components/DropdownSearch';
 import axios from 'axios';
 
 
@@ -45,9 +45,8 @@ const UploadPage = () => {
         }
 
         try{
-            const uploadResponse = await axios.post('http://10.0.0.30:5001/api/post/upload', {
+            const uploadResponse = await axios.post('http://10.20.146.243:5001/api/post/upload', {
                 //body
-                username:"temp", 
                 title,
                 content,
                 token: token
@@ -95,7 +94,7 @@ const UploadPage = () => {
                     multiline
                 />
             </View>
-            <DropDown />
+            <DropDownSearch />
             <Text style={{fontWeight:"bold", fontSize:22, textDecorationLine:"underline", textAlign:'center', marginTop:20, marginBottom:5}}>Media</Text>
             <View style={{flexDirection:"row", justifyContent:"center"}}>
                 <Pressable

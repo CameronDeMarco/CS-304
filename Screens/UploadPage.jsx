@@ -45,7 +45,7 @@ const UploadPage = () => {
         }
 
         try{
-            const uploadResponse = await axios.post('http://10.20.146.243:5001/api/post/upload', {
+            const uploadResponse = await axios.post('http://10.20.147.194:5001/api/post/upload', {
                 //body
                 title,
                 content,

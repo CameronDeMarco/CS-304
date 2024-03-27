@@ -42,25 +42,26 @@ const staticPosts = [
 
 const FeedPage = () => {
   const [commentText, setCommentText] = useState('');
-  const [isCommenting, setIsCommenting] = useState(false);
+  const [openCommentPostId, setOpenCommentPostId] = useState(null); // Track the post ID for open comment box
   const [comments, setComments] = useState({}); 
+  const [expandedComments, setExpandedComments] = useState([]); // Track expanded comments
+  const [showAllComments, setShowAllComments] = useState(false);
 
- useEffect(() => {
-  loadComments();
-}, []);
 
-useEffect(() => {
-  saveComments();
-}, [comments]);
+  useEffect(() => {
+    loadComments();
+  }, []);
 
+  useEffect(() => {
+    saveComments();
+  }, [comments]);
 
   const handleLike = (postId) => {
-
     console.log(`Liked post ${postId}`);
   };
 
   const handleComment = (postId) => {
-    setIsCommenting(true);
+    setOpenCommentPostId((prevId) => (prevId !== postId ? postId : null));
   };
 
   const handlePostComment = async (postId) => {
@@ -70,7 +71,7 @@ useEffect(() => {
       setComments({ ...comments, [postId]: updatedComments });
 
       setCommentText('');
-      setIsCommenting(false);
+      setOpenCommentPostId(null); // Reset the open comment post ID
       Keyboard.dismiss();
     } catch (error) {
       console.error('Error posting comment:', error);
@@ -96,63 +97,70 @@ useEffect(() => {
     }
   };
 
-  const renderPost = ({ item }) => (
+// Function toggeles whether the comments are expanded or not
+  const toggleComments = (postId) => {
+    if (expandedComments.includes(postId)) {
+      setExpandedComments((prev) => prev.filter((id) => id !== postId));
+      setShowAllComments(false); // Collapse comments and set showAllComments to false
+    } else {
+      setExpandedComments((prev) => [...prev, postId]);
+      setShowAllComments(true); // Expand comments and set showAllComments to true
+    }
+  };
+
+  const renderPost = ({ item }) => {
+    return (
     <View style={styles.postContainer}>
       <Text style={styles.username}>@{item.username}</Text>
       <View style={styles.carouselContainer}>
-        {/* <Carousel
-        loop
-        width={Dimensions.get('window').width}
-        height={Dimensions.get('window').width / 1.6}
-        autoPlay={false}
-        data={item.images}
-        scrollAnimationDuration={800}
-        renderItem={({ item: image }) => (
-          <View style={{ flex: 1, alignItems: 'center' }}>
-            <Image source={image} style={styles.postImage} />
-          </View>
-        )}
-      /> */}
-      <Carousel
-        loop
-        width={Dimensions.get('window').width}
-        height={Dimensions.get('window').width / 1.6}
-        autoPlay={false}
-        data={item.images}
-        scrollAnimationDuration={800}
-        gestureActiveMultiplier={10} // Adjust this value (default is 1)
-        gestureVelocityImpact={0.1} // Adjust this value (default is 0.1)
-        renderItem={({ item: image }) => (
-          <View style={{ flex: 1, alignItems: 'center' }}>
-            <Image source={image} style={styles.postImage} />
-          </View>
-        )}
-      />
-    </View>
+        <Carousel
+          loop
+          width={Dimensions.get('window').width}
+          height={Dimensions.get('window').width / 1.6}
+          autoPlay={false}
+          data={item.images}
+          scrollAnimationDuration={800}
+          gestureActiveMultiplier={10} // Adjust this value (default is 1)
+          gestureVelocityImpact={0.1} // Adjust this value (default is 0.1)
+          panGestureHandlerProps={{
+            activeOffsetX: [-10, 10],
+          }}
+          renderItem={({ item: image }) => (
+            <View style={{ flex: 1, alignItems: 'center' }}>
+              <Image source={image} style={styles.postImage} />
+            </View>
+          )}
+        />
+      </View>
       <Text style={styles.description}>Location: {item.location}</Text>
       <Text style={styles.description}>Description: {item.description}</Text>
-    {/* renders comments */}
-      {comments[item.id]?.map((comment, index) => (
+      {/* Render comments */}
+      {comments[item.id]?.slice(0, showAllComments || expandedComments.includes(item.id) ? undefined : 2).map((comment, index) => (
         <Text key={index} style={styles.commentText}>
           {comment}
         </Text>
       ))}
+      {/* Render the expand/shrink icon */}
+      {comments[item.id]?.length > 2 && (
+        <TouchableOpacity onPress={() => toggleComments(item.id)}>
+          <Icon name={expandedComments.includes(item.id) ? "up" : "down"} style={styles.buttonIcon} />
+        </TouchableOpacity>
+      )}
       <View style={styles.buttonContainer}>
         <TouchableOpacity onPress={() => handleLike(item.id)}>
           <Icon name="like1" style={styles.buttonIcon} />
         </TouchableOpacity>
-
         <TouchableOpacity onPress={() => handleComment(item.id)}>
           <Icon name="message1" style={styles.buttonIcon} />
         </TouchableOpacity>
       </View>
-      {isCommenting && (
+      {openCommentPostId === item.id && (
         <View style={styles.commentContainer}>
           <TextInput
             style={styles.commentInput}
-            placeholder="Type your comment..."
+            placeholder="Write a comment..."
             value={commentText}
-            onChangeText={(text) => setCommentText(text)}
+            onChangeText={setCommentText}
           />
           <TouchableOpacity onPress={() => handlePostComment(item.id)}>
             <Text style={styles.postCommentButton}>Post</Text>
@@ -161,6 +169,7 @@ useEffect(() => {
       )}
     </View>
   );
+};
 
   return (
     <View>

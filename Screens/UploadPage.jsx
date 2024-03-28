@@ -8,15 +8,15 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import DropDownSearch  from '../Components/DropdownSearch';
 import axios from 'axios';
 
-
 const UploadPage = () => {
     const theme = useTheme();
     const [ITEMLIST, setItem] = useState([]);
     const[title, setTitle] = useState([]);
     const[content, setContent] = useState([]);
 
-    function addFile(fileName, uri){
-        setItem([...ITEMLIST, {fileName:fileName, uri:uri}]);
+    function addFile(fileName, uri, type){
+        setItem([...ITEMLIST, {fileName:fileName, uri:uri, type:type}]);
+        console.log(type);
     }
 
     const deleteMediaItem = (item) => {
@@ -28,7 +28,7 @@ const UploadPage = () => {
         let result = await ImagePicker.launchCameraAsync();
         if(!result.canceled){
             console.log(result.assets[0].fileName + " selected.");
-            addFile(test=result.assets[0].fileName, result.assets[0].uri);
+            addFile(test=result.assets[0].fileName, result.assets[0].uri, result.assets[0].mimeType);
             console.log(result.assets[0]);
         }else{
             console.log("Media selection cancled.");
@@ -45,20 +45,33 @@ const UploadPage = () => {
         }
 
         try{
-            const uploadResponse = await axios.post('http://10.20.147.194:5001/api/post/upload', {
-                //body
-                title,
-                content,
-                token: token
+            const uploadForm = new FormData();
+            uploadForm.append("title", title);
+            uploadForm.append("content", content);
+            ITEMLIST.map((item) => uploadForm.append("image", {
+                uri: item.uri,
+                name: item.fileName,
+                type: item.type,
+            }));
+            const uploadResponse = await axios.postForm('http://10.20.144.175:5001/api/post/upload', uploadForm, {
+                headers: {
+                  'Content-Type': 'multipart/form-data', // Important! This sets the content type to multipart/form-data
+                  'authorization': token,
+                },
             });
         }catch(error){
             console.log(error);
-            console.log(error.response.data);
             if(error.responce){
-                
+                // Server responded with an error status code
+                Alert.alert('Error', error.response.data.message || 'Failed to upload. Please try again later.');
+                console.log(error.response.data);
             }else if(error.request){
+                // The request was made but no response was received
                 Alert.alert('Error', 'Network Error. Please check your internet connection.');
+                console.log(error.request);
             }else{
+                // Something else happened
+                Alert.alert('Error', 'An unexpected error occurred. Please try again later.');
                 console.log('Error', error.message);
             }
         }
@@ -69,7 +82,7 @@ const UploadPage = () => {
 
         if(!result.canceled){
             console.log(result.assets[0].fileName + " selected.");
-            addFile(test=result.assets[0].fileName, result.assets[0].uri);
+            addFile(test=result.assets[0].fileName, result.assets[0].uri, result.assets[0].mimeType);
             console.log(result.assets[0]);
         }else{
             console.log("Media selection cancled.");

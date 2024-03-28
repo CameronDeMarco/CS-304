@@ -3,42 +3,43 @@ import { View, Text, FlatList, Image, TouchableOpacity, StyleSheet, Dimensions, 
 import Carousel from 'react-native-reanimated-carousel';
 import Icon from 'react-native-vector-icons/AntDesign';
 import AsyncStorage from '@react-native-async-storage/async-storage'; 
+import axios from 'axios';
 
-const staticPosts = [
-  {
-    id: 1,
-    username: 'JohnDoe',
-    images: [
-      { uri: 'https://adventuresofaplusk.com/wp-content/uploads/2022/01/DSC05615-683x1024.jpg' },
-      { uri: 'https://media.istockphoto.com/id/1672317574/photo/ama-dablam-mountain-peak.webp?b=1&s=170667a&w=0&k=20&c=Ea8yDEHpUemrRuMZUKGPDBE11YTWVksIupMN8FkEBf8=' },
-    ],
-    location: 'Mt Willard White Mountains',
-    description: 'This is the first post.',
-    comments: [],
-  },
-  {
-    id: 2,
-    username: 'JaneSmith',
-    images: [
-      { uri: 'https://www.travel-experience-live.com/wp-content/uploads/2014/07/P6186575-2.jpg?x46828' },
-      { uri: 'https://www.travel-experience-live.com/wp-content/uploads/2014/07/P6186575-2.jpg?x46828' },
-    ],  
-    location: 'Flume',
-    description: 'Another post here.',
-    comments: [],
-  },
-  {
-    id: 3,
-    username: 'Smith',
-    images: [
-      { uri: 'https://media.istockphoto.com/id/1672317574/photo/ama-dablam-mountain-peak.webp?b=1&s=170667a&w=0&k=20&c=Ea8yDEHpUemrRuMZUKGPDBE11YTWVksIupMN8FkEBf8=' },
-      { uri: 'https://www.travel-experience-live.com/wp-content/uploads/2014/07/P6186575-2.jpg?x46828' },
-    ],   
-    location: 'Mountain',
-    description: 'Another post here.',
-    comments: [],
-  },
-];
+// const staticPosts = [
+//   {
+//     id: 1,
+//     username: 'JohnDoe',
+//     images: [
+//       { uri: 'https://adventuresofaplusk.com/wp-content/uploads/2022/01/DSC05615-683x1024.jpg' },
+//       { uri: 'https://media.istockphoto.com/id/1672317574/photo/ama-dablam-mountain-peak.webp?b=1&s=170667a&w=0&k=20&c=Ea8yDEHpUemrRuMZUKGPDBE11YTWVksIupMN8FkEBf8=' },
+//     ],
+//     location: 'Mt Willard White Mountains',
+//     description: 'This is the first post.',
+//     comments: [],
+//   },
+//   {
+//     id: 2,
+//     username: 'JaneSmith',
+//     images: [
+//       { uri: 'https://www.travel-experience-live.com/wp-content/uploads/2014/07/P6186575-2.jpg?x46828' },
+//       { uri: 'https://www.travel-experience-live.com/wp-content/uploads/2014/07/P6186575-2.jpg?x46828' },
+//     ],  
+//     location: 'Flume',
+//     description: 'Another post here.',
+//     comments: [],
+//   },
+//   {
+//     id: 3,
+//     username: 'Smith',
+//     images: [
+//       { uri: 'https://media.istockphoto.com/id/1672317574/photo/ama-dablam-mountain-peak.webp?b=1&s=170667a&w=0&k=20&c=Ea8yDEHpUemrRuMZUKGPDBE11YTWVksIupMN8FkEBf8=' },
+//       { uri: 'https://www.travel-experience-live.com/wp-content/uploads/2014/07/P6186575-2.jpg?x46828' },
+//     ],   
+//     location: 'Mountain',
+//     description: 'Another post here.',
+//     comments: [],
+//   },
+// ];
 
 const FeedPage = () => {
   const [commentText, setCommentText] = useState('');
@@ -46,15 +47,26 @@ const FeedPage = () => {
   const [comments, setComments] = useState({}); 
   const [expandedComments, setExpandedComments] = useState([]); // Track expanded comments
   const [showAllComments, setShowAllComments] = useState(false);
+  const [posts, setPosts] = useState([]);
 
 
   useEffect(() => {
+    fetchPosts();
     loadComments();
   }, []);
 
   useEffect(() => {
     saveComments();
   }, [comments]);
+
+  const fetchPosts = async () => {
+    try {
+      const response = await axios.get('http://localhost:5001/api/post/posts');
+      setPosts(response.data.posts);
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+    }
+  };
 
   const handleLike = (postId) => {
     console.log(`Liked post ${postId}`);
@@ -108,17 +120,17 @@ const FeedPage = () => {
     }
   };
 
-  const renderPost = ({ item }) => {
-    return (
+const renderPost = ({ item }) => {
+  return (
     <View style={styles.postContainer}>
       <Text style={styles.username}>@{item.username}</Text>
       <View style={styles.carouselContainer}>
-        <Carousel
+        {/* <Carousel
           loop
           width={Dimensions.get('window').width}
           height={Dimensions.get('window').width / 1.6}
           autoPlay={false}
-          data={item.images}
+          // data={item.images}
           scrollAnimationDuration={800}
           gestureActiveMultiplier={10} // Adjust this value (default is 1)
           gestureVelocityImpact={0.1} // Adjust this value (default is 0.1)
@@ -127,13 +139,13 @@ const FeedPage = () => {
           }}
           renderItem={({ item: image }) => (
             <View style={{ flex: 1, alignItems: 'center' }}>
-              <Image source={image} style={styles.postImage} />
+              <Image source={{ uri: image.uri }} style={styles.postImage} />
             </View>
           )}
-        />
+        /> */}
       </View>
-      <Text style={styles.description}>Location: {item.location}</Text>
-      <Text style={styles.description}>Description: {item.description}</Text>
+      <Text style={styles.description}>Location: {item.title}</Text>
+      <Text style={styles.description}>Description: {item.content}</Text>
       {/* Render comments */}
       {comments[item.id]?.slice(0, showAllComments || expandedComments.includes(item.id) ? undefined : 2).map((comment, index) => (
         <Text key={index} style={styles.commentText}>
@@ -171,15 +183,15 @@ const FeedPage = () => {
   );
 };
 
-  return (
-    <View>
-      <FlatList
-        data={staticPosts}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={renderPost}
-      />
-    </View>
-  );
+return (
+  <View>
+    <FlatList
+      data={posts} // Use fetched posts instead of staticPosts
+      keyExtractor={(item) => item.toString()}
+      renderItem={renderPost}
+    />
+  </View>
+);
 };
 
 const styles = StyleSheet.create({

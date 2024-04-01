@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, CommonActions } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 
@@ -25,7 +25,7 @@ const Login = ({ navigation }) => {
   const handleLogin = async () => {
     try {
       // Send login request to backend
-      const response = await axios.post('http://10.20.144.175:5001/api/user/login', {
+      const response = await axios.post('http://10.20.148.198:5001/api/user/login', {
         username,
         password
       });
@@ -38,7 +38,12 @@ const Login = ({ navigation }) => {
         Alert.alert(`Successfully logged in as ${username}`);
         
         // Navigate to another screen
-        navigation.navigate('Feed');
+        navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{ name: 'Main' }],
+        })
+      );
       } else {
         // Handle invalid response
         console.error('Invalid response:', response);

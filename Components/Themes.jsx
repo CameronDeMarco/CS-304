@@ -10,14 +10,15 @@ export const useDarkMode = () => {
     colors: {
         ...DarkTheme.colors,
         listText: '#222222',
-        primary: 'white',
+        primary: '#CD553B',
         background: '#222222',
         text: 'white',
         itemContainer: '#ffffff',
-        button: primaryColor,
+        button: '#CD553B',
         secondary: '#000000',
         inputField: 'grey',
         popup: 'black',
+        icon: '#CD553B',
     },
     };
     const CustomLightTheme = {
@@ -25,14 +26,15 @@ export const useDarkMode = () => {
     colors: {
         ...DefaultTheme.colors,
         listText: '#264653',
-        primary: 'black',
-        background: '#fff',
+        primary: '#CD553B',
+        background: 'white',
         text: 'black',
-        itemContainer: '#ffffff',
-        button: primaryColor,
+        itemContainer: 'white',
+        button: 'black',
         secondary: '#264653',
         inputField: 'White',
         popup: 'white',
+        icon: '#CD553B',
     },
     };
 

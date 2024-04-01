@@ -1,5 +1,5 @@
 const express = require('express');
-const router = express.Router();
+//const router = express.Router();
 const jwt = require('jsonwebtoken');
 
 module.exports.authenticate = function (req, res, next) {
@@ -13,4 +13,3 @@ module.exports.authenticate = function (req, res, next) {
         res.status(401).json({ message: 'Unauthorized' });
     }
 }
-

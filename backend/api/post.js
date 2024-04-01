@@ -37,6 +37,7 @@ const storage = multer.diskStorage({
       }
   });
 
+
 // router.post('/upload', [Auth.authenticate, upload.array("image", 4)], async (req, res) => {
 //     try {
 //         const { title, content } = req.body;
@@ -67,7 +68,13 @@ router.get('/posts', async (req, res) => {
 router.post('/posts/:postId/like', Auth.authenticate, async (req, res) => {
     try {
         const { postId } = req.params;
-        // Logic to update the post in the database to increment the likes count
+        // Find the post by postId and increment the likes field
+        const post = await Post.findById(postId);
+        if (!post) {
+            return res.status(404).json({ message: 'Post not found' });
+        }
+        post.likes += 1;
+        await post.save();
         res.status(200).json({ message: 'Post liked successfully' });
     } catch (error) {
         console.error('Error liking post:', error);

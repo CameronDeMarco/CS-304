@@ -1,8 +1,8 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-// Define the schema for the User
-const uploadSchema = new Schema({
+// Define the schema for the Post
+const postSchema = new Schema({
   username: {
     type: String,
     required: true,
@@ -25,5 +25,5 @@ const uploadSchema = new Schema({
   },
 }, { collection: 'posts' });
 
-const post = mongoose.model("posts", uploadSchema);
-module.exports = post;
+const Post = mongoose.model("Post", postSchema);
+module.exports = Post;

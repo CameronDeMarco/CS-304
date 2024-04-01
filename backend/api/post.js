@@ -4,13 +4,24 @@ const Post = require('../models/post');
 const jwt = require('jsonwebtoken');
 const Auth = require('../api/Auth');
 const multer = require('multer');
-const upload = multer({ dest: 'uploads/'});
+/*const upload = multer({ dest: 'uploads/'});*/
+
+var storage = multer.diskStorage({
+    destination: function(req, file, cb){
+        cb(null, 'uploads/')
+    },
+    filename: function(req, file, cb){
+        cb(null, 'image-' + Date.now() + '-' + Math.round(Math.random() * 1E9) + '.png');
+    }
+})
+
+const upload = multer({storage: storage});
 
 router.post('/upload', [Auth.authenticate, upload.array("image", 4)], async (req, res) => {
     try {
         const { title, content } = req.body;
         const username = req.headers['authorization'].username;
-        imageNames = req.files.map(({path}) => path);
+        imageNames = req.files.map(({filename}) => filename);
         console.log(username + " uploaded media: " + imageNames);
         const newPost = new Post({ username, title, content, mediaFile: imageNames });
         await newPost.save();

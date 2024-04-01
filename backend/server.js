@@ -11,8 +11,7 @@ const PostRoutes = require('./api/post')
 
 app.use('/api/user', UserRoutes)
 app.use('/api/post', PostRoutes)
-
-
+app.use('/uploads', express.static(__dirname + '../../uploads'))
 
 app.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}...`);

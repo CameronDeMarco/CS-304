@@ -61,7 +61,7 @@ const FeedPage = () => {
 
   const fetchPosts = async () => {
     try {
-      const response = await axios.get('http://localhost:5001/api/post/posts');
+      const response = await axios.get('http://10.0.0.87:5001/api/post/posts');
       setPosts(response.data.posts);
     } catch (error) {
       console.error('Error fetching posts:', error);
@@ -125,12 +125,14 @@ const renderPost = ({ item }) => {
     <View style={styles.postContainer}>
       <Text style={styles.username}>@{item.username}</Text>
       <View style={styles.carouselContainer}>
-        {/* <Carousel
+        { 
+        item.mediaFile?.length > 0 &&
+        <Carousel
           loop
           width={Dimensions.get('window').width}
           height={Dimensions.get('window').width / 1.6}
           autoPlay={false}
-          // data={item.images}
+          data={item.mediaFile}
           scrollAnimationDuration={800}
           gestureActiveMultiplier={10} // Adjust this value (default is 1)
           gestureVelocityImpact={0.1} // Adjust this value (default is 0.1)
@@ -139,10 +141,11 @@ const renderPost = ({ item }) => {
           }}
           renderItem={({ item: image }) => (
             <View style={{ flex: 1, alignItems: 'center' }}>
-              <Image source={{ uri: image.uri }} style={styles.postImage} />
+              {console.log("http://10.0.0.87:5001/uploads/"+image)}
+              <Image source={{ uri: "http://10.0.0.87:5001/uploads/"+image }} style={styles.postImage} />
             </View>
           )}
-        /> */}
+        />}
       </View>
       <Text style={styles.description}>Location: {item.title}</Text>
       <Text style={styles.description}>Description: {item.content}</Text>
@@ -187,7 +190,8 @@ return (
   <View>
     <FlatList
       data={posts} // Use fetched posts instead of staticPosts
-      keyExtractor={(item) => item.toString()}
+      //keyExtractor={(item) => item.toString()}
+      keyExtractor={(item) => item._id}
       renderItem={renderPost}
     />
   </View>

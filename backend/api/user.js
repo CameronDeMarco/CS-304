@@ -4,6 +4,8 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const saltRounds = 10; // Number of salt rounds to use (higher is more secure)
 const multer = require('multer');
+const path = require('path')
+const Auth = require('../api/Auth');
 const User = require('../models/user');
 
 // Hash the password before saving it
@@ -99,106 +101,89 @@ router.get('/', extractToken, verifyUser, (req, res) => {
     return res.json({ Status: "Success", userId: req.userId, username: req.username })
 })
 
-// Multer configuration for handling file uploads
+// Configure multer storage to handle file uploads
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, '../../uploads/'); // Destination directory for storing uploaded files
+    cb(null, 'uploads/');
   },
   filename: function (req, file, cb) {
-    // Generate a unique filename for each uploaded file
-    cb(null, Date.now() + '-' + file.originalname);
+    // Generate a unique filename with .png extension
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + '.png');
   }
 });
+
+// Initialize multer with the configured storage
 const upload = multer({ storage: storage });
 
-router.post('/:userId/upload-profile-picture', upload.single('image'), async (req, res) => {
+router.post('/upload-profile-picture', [Auth.authenticate, upload.single("image")], async (req, res) => {
   try {
-    const user = await User.findById(req.params.userId);
-    const userId = req.params.userId;
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-    if (!req.file) {
-      return res.status(400).json({ message: 'No file uploaded' });
-    }
-
-    // Find the user document by ID and update or insert fields
-    await User.updateOne(
-      { _id: userId },
-      {
-        $setOnInsert: {
-          profilePicture: req.file.path
-        }
-      },
-      { upsert: true }
+    const username = req.headers['authorization'].username;
+      const imageName = path.basename(req.file.path);
+      console.log(username + " uploaded media: " + imageName);
+      
+      await User.findOneAndUpdate(
+        { username },
+        { $set: {  profilePicture: imageName } },
+        { upsert: true }
     );
-
-    res.json({ message: 'Profile picture uploaded successfully' });
   } catch (error) {
-    console.error('Error uploading profile picture:', error);
-    res.status(500).json({ message: 'Internal server error' });
+      console.error('Error uploading profile image:', error);
+      res.status(500).json({ message: 'Server Error' });
   }
 });
 
-router.post('/:userId/upload-background-picture', upload.single('image'), async (req, res) => {
+router.post('/upload-background-picture', [Auth.authenticate, upload.single("image")], async (req, res) => {
   try {
-    const user = await User.findById(req.params.userId);
-    const userId = req.params.userId;
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-    if (!req.file) {
-      return res.status(400).json({ message: 'No file uploaded' });
-    }
-
-    // Find the user document by ID and update or insert fields
-    await User.updateOne(
-      { _id: userId },
-      {
-        $setOnInsert: {
-          backgroundPicture: req.file.path
-        }
-      },
-      { upsert: true }
+    const username = req.headers['authorization'].username;
+      const imageName = path.basename(req.file.path);
+      console.log(username + " uploaded media: " + imageName);
+      
+      await User.findOneAndUpdate(
+        { username },
+        { $set: {  backgroundPicture: imageName } },
+        { upsert: true }
     );
-
-    res.json({ message: 'Background picture uploaded successfully' });
   } catch (error) {
-    console.error('Error uploading background picture:', error);
-    res.status(500).json({ message: 'Internal server error' });
+      console.error('Error uploading background image:', error);
+      res.status(500).json({ message: 'Server Error' });
   }
 });
 
-router.get('/:userId/profile-picture', async (req, res) => {
+router.get('/profile-picture', Auth.authenticate, async (req, res) => {
   try {
-    const userId = req.params.userId;
-    const user = await User.findById(userId);
+    const username = req.headers['authorization'].username;
 
-    if (!user || !user.profilePicture) {
-      return res.status(404).json({ message: 'Profile picture not found' });
-    }
+      // Fetch imageName for the specified user
+      const user = await User.findOne({ username });
 
-    res.sendFile(user.profilePicture);
+      if (!user || !user.profilePicture) {
+          return res.status(404).json({ message: 'Profile image not found for this user' });
+      }
+
+      res.status(200).json({ imageUrl: user.profilePicture });
   } catch (error) {
-    console.error('Error fetching profile picture:', error);
-    res.status(500).json({ message: 'Internal server error' });
+      console.error('Error fetching profile picture:', error);
+      res.status(500).json({ message: 'Server Error' });
   }
 });
 
 // Background picture endpoint
-router.get('/:userId/background-picture', async (req, res) => {
+router.get('/background-picture', Auth.authenticate, async (req, res) => {
   try {
-    const userId = req.params.userId;
-    const user = await User.findById(userId);
+    const username = req.headers['authorization'].username;
 
-    if (!user || !user.backgroundPicture) {
-      return res.status(404).json({ message: 'Background picture not found' });
-    }
+      // Fetch imageName for the specified user
+      const user = await User.findOne({ username });
 
-    res.sendFile(user.backgroundPicture);
+      if (!user || !user.backgroundPicture) {
+          return res.status(404).json({ message: 'Background image not found for this user' });
+      }
+
+      res.status(200).json({ imageUrl: user.backgroundPicture });
   } catch (error) {
-    console.error('Error fetching background picture:', error);
-    res.status(500).json({ message: 'Internal server error' });
+      console.error('Error fetching background picture:', error);
+      res.status(500).json({ message: 'Server Error' });
   }
 });
 

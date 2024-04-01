@@ -59,6 +59,8 @@ const AccountPage = () => {
   const [backgroundPicture, setBackgroundPicture] = useState(null);
   const [profileImageUri, setProfileImageUri] = useState('assets/images/logo.png');
   const [backgroundImageUri, setBackgroundImageUri] = useState('assets/images/cover.jpg');
+  const [profileImageInfo, setProfileImageInfo] = useState(null);
+  const [backgroundImageInfo, setBackgroundImageInfo] = useState(null);
 
   useEffect(() => {
     // Retrieve the token from AsyncStorage
@@ -76,7 +78,7 @@ const AccountPage = () => {
               setAuth(true);
               setUserId(res.data.userId);
               setUsername(res.data.username);
-              fetchUserImages(res.data.userId);
+              fetchUserImages();
               console.log("User id ", res.data.userId);
               console.log("Username ", res.data.username);
             } else {
@@ -90,21 +92,21 @@ const AccountPage = () => {
       .catch(error => console.error('Error retrieving token:', error)); // Handle AsyncStorage error
   }, []);
 
-  const fetchUserImages = async (userId) => {
+  const fetchUserImages = async () => {
     try {
       // Fetch profile picture
-      const profileResponse = await axios.get(`http://10.20.148.198:5001/api/user/${userId}/profile-picture`);
+      const profileResponse = await axios.get(`http://10.20.148.198:5001/api/user/profile-picture`);
       if (profileResponse.status === 200) {
-        setProfilePicture(profileResponse.data);
+        setProfilePicture(profileResponse.data.imageUrl);
       } else {
         setProfilePicture(null);
         console.error('Error fetching profile picture. Status:', profileResponse.status);
       }
 
       // Fetch background picture
-      const backgroundResponse = await axios.get(`http://10.20.148.198:5001/api/user/${userId}/background-picture`);
+      const backgroundResponse = await axios.get(`http://10.20.148.198:5001/api/user/background-picture`);
       if (backgroundResponse.status === 200) {
-        setBackgroundPicture(backgroundResponse.data);
+        setBackgroundPicture(backgroundResponse.data.imageUrl);
       } else {
         setBackgroundPicture(null);
         console.error('Error fetching background picture. Status:', backgroundResponse.status);
@@ -128,9 +130,19 @@ const AccountPage = () => {
       if (!result.cancelled) {
         if (type === 'profile') {
           setProfilePicture(result.uri);
+          const profileLocalUri = result.uri;
+          const profileFileName = profileLocalUri.split('/').pop();
+          const profileFileType = profileLocalUri.split('.').pop();
+          const profileImageInfo = { profileFileName, profileFileType };
+          setProfileImageInfo(profileImageInfo);
           uploadProfilePicture(result.uri);
         } else if (type === 'background') {
           setBackgroundPicture(result.uri);
+          const backgroundLocalUri = result.uri;
+          const backgroundFileName = backgroundLocalUri.split('/').pop();
+          const backgroundFileType = backgroundLocalUri.split('.').pop();
+          const backgroundImageInfo = { backgroundFileName, backgroundFileType };
+          setBackgroundImageInfo(backgroundImageInfo);
           uploadBackgroundPicture(result.uri);
         }
       }
@@ -140,19 +152,27 @@ const AccountPage = () => {
   };
 
   const uploadProfilePicture = async (uri) => {
+    let token;
+    try {
+      token = await AsyncStorage.getItem('token');
+      console.log("token: " + token);
+    } catch (error) {
+      console.log(error);
+    }
     try {
       const formData = new FormData();
       formData.append('image', {
         uri,
-        name: 'profile.jpg',
-        type: 'image/jpg',
+        name: profileImageInfo.profileFileName,
+        type: `image/${profileImageInfo.profileFileType}`,
       });
 
       console.log(formData);
 
-      const response = await axios.post(`http://10.20.148.198:5001/api/user/${userId}/upload-profile-picture`, formData, {
+      const response = await axios.post(`http://10.20.148.198:5001/api/user/upload-profile-picture`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
+          'authorization': token,
         },
       });
 
@@ -163,17 +183,25 @@ const AccountPage = () => {
   };
 
   const uploadBackgroundPicture = async (uri) => {
+    let token;
+    try {
+      token = await AsyncStorage.getItem('token');
+      console.log("token: " + token);
+    } catch (error) {
+      console.log(error);
+    }
     try {
       const formData = new FormData();
       formData.append('image', {
         uri,
-        name: 'background.jpg',
-        type: 'image/jpg',
+        name: backgroundImageInfo.backgroundFileName,
+        type: `image/${backgroundImageInfo.backgroundFileType}`
       });
 
-      const response = await axios.post(`http://10.20.148.198:5001/api/user/${userId}/upload-background-picture`, formData, {
+      const response = await axios.post(`http://10.20.148.198:5001/api/user/upload-background-picture`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
+          'authorization': token,
         },
       });
 
@@ -215,7 +243,7 @@ const AccountPage = () => {
       <StatusBar backgroundColor="#808080" />
       <View>
         <Image
-          source={backgroundPicture ? { uri: backgroundPicture } : { uri: backgroundImageUri }}
+          source={backgroundPicture ? { uri: `http://10.20.148.198:5001/uploads/${backgroundPicture}` } : { uri: backgroundImageUri }}
           resizeMode="cover"
           style={{
             height: 228,
@@ -234,7 +262,7 @@ const AccountPage = () => {
             borderWidth: 2,
             marginTop: -90,
           }}
-          source={profilePicture ? { uri: profilePicture } : { uri: profileImageUri }}
+          source={profilePicture ? { uri: `http://10.20.148.198:5001/uploads/${profilePicture}` } : { uri: profileImageUri }}
           resizeMode="contain"
         />
 

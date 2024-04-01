@@ -53,7 +53,7 @@ const UploadPage = () => {
                 name: item.fileName,
                 type: item.type,
             }));
-            const uploadResponse = await axios.postForm('http://10.20.144.175:5001/api/post/upload', uploadForm, {
+            const uploadResponse = await axios.postForm('http://10.20.148.198:5001/api/post/upload', uploadForm, {
                 headers: {
                   'Content-Type': 'multipart/form-data', // Important! This sets the content type to multipart/form-data
                   'authorization': token,
@@ -61,7 +61,7 @@ const UploadPage = () => {
             });
         }catch(error){
             console.log(error);
-            if(error.responce){
+            if(error.response){
                 // Server responded with an error status code
                 Alert.alert('Error', error.response.data.message || 'Failed to upload. Please try again later.');
                 console.log(error.response.data);

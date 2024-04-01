@@ -29,10 +29,6 @@ const userSchema = new Schema({
     type: String,
     required: true,
   },
-  mediaFile: [{
-    type: String,
-    sparce: true,
-  }],
   createdAt: {
     type: Date,
     default: Date.now,

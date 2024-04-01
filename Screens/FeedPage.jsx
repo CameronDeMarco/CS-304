@@ -5,41 +5,6 @@ import Icon from 'react-native-vector-icons/AntDesign';
 import AsyncStorage from '@react-native-async-storage/async-storage'; 
 import axios from 'axios';
 
-// const staticPosts = [
-//   {
-//     id: 1,
-//     username: 'JohnDoe',
-//     images: [
-//       { uri: 'https://adventuresofaplusk.com/wp-content/uploads/2022/01/DSC05615-683x1024.jpg' },
-//       { uri: 'https://media.istockphoto.com/id/1672317574/photo/ama-dablam-mountain-peak.webp?b=1&s=170667a&w=0&k=20&c=Ea8yDEHpUemrRuMZUKGPDBE11YTWVksIupMN8FkEBf8=' },
-//     ],
-//     location: 'Mt Willard White Mountains',
-//     description: 'This is the first post.',
-//     comments: [],
-//   },
-//   {
-//     id: 2,
-//     username: 'JaneSmith',
-//     images: [
-//       { uri: 'https://www.travel-experience-live.com/wp-content/uploads/2014/07/P6186575-2.jpg?x46828' },
-//       { uri: 'https://www.travel-experience-live.com/wp-content/uploads/2014/07/P6186575-2.jpg?x46828' },
-//     ],  
-//     location: 'Flume',
-//     description: 'Another post here.',
-//     comments: [],
-//   },
-//   {
-//     id: 3,
-//     username: 'Smith',
-//     images: [
-//       { uri: 'https://media.istockphoto.com/id/1672317574/photo/ama-dablam-mountain-peak.webp?b=1&s=170667a&w=0&k=20&c=Ea8yDEHpUemrRuMZUKGPDBE11YTWVksIupMN8FkEBf8=' },
-//       { uri: 'https://www.travel-experience-live.com/wp-content/uploads/2014/07/P6186575-2.jpg?x46828' },
-//     ],   
-//     location: 'Mountain',
-//     description: 'Another post here.',
-//     comments: [],
-//   },
-// ];
 
 const FeedPage = () => {
   const [commentText, setCommentText] = useState('');
@@ -125,12 +90,13 @@ const renderPost = ({ item }) => {
     <View style={styles.postContainer}>
       <Text style={styles.username}>@{item.username}</Text>
       <View style={styles.carouselContainer}>
-        {/* <Carousel
+        <Carousel
           loop
           width={Dimensions.get('window').width}
           height={Dimensions.get('window').width / 1.6}
           autoPlay={false}
-          // data={item.images}
+          // image
+          data={item.mediaFile.map(uploads => ({ uri: `http://localhost:5001/uploads/${uploads}` }))} // Construct image URIs
           scrollAnimationDuration={800}
           gestureActiveMultiplier={10} // Adjust this value (default is 1)
           gestureVelocityImpact={0.1} // Adjust this value (default is 0.1)
@@ -142,7 +108,7 @@ const renderPost = ({ item }) => {
               <Image source={{ uri: image.uri }} style={styles.postImage} />
             </View>
           )}
-        /> */}
+        />
       </View>
       <Text style={styles.description}>Location: {item.title}</Text>
       <Text style={styles.description}>Description: {item.content}</Text>
@@ -186,8 +152,8 @@ const renderPost = ({ item }) => {
 return (
   <View>
     <FlatList
-      data={posts} // Use fetched posts instead of staticPosts
-      keyExtractor={(item) => item.toString()}
+      data={posts}
+      keyExtractor={(item) => (item && item.id ? item.id.toString() : Math.random().toString())}
       renderItem={renderPost}
     />
   </View>

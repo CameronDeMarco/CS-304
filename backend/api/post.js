@@ -49,7 +49,11 @@ router.post('/posts/:postId/comments', Auth.authenticate, async (req, res) => {
     try {
         const { postId } = req.params;
         const { comment } = req.body;
+        console.log(req.body);
+        const username = req.headers['authorization'].username;
         // Logic to update the post in the database to add the comment
+        const newComment = new Comment({ postId, username, comment });
+        await newComment.save()
         res.status(200).json({ message: 'Comment posted successfully' });
     } catch (error) {
         console.error('Error posting comment:', error);

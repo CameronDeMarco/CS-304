@@ -61,7 +61,7 @@ const FeedPage = () => {
 
   const fetchPosts = async () => {
     try {
-      const response = await axios.get('http://localhost:5001/api/post/posts');
+      const response = await axios.get('http://10.0.0.87:5001/api/post/posts');
       setPosts(response.data.posts);
     } catch (error) {
       console.error('Error fetching posts:', error);
@@ -85,6 +85,17 @@ const FeedPage = () => {
       setCommentText('');
       setOpenCommentPostId(null); // Reset the open comment post ID
       Keyboard.dismiss();
+
+      console.log('http://10.0.0.87:5001/api/posts/'+postId+'/comments');
+      let token = await AsyncStorage.getItem('token');
+      const response = await axios.post('http://10.0.0.87:5001/api/post/posts/'+postId+'/comments',{
+        comment: commentText,
+      },{
+        headers: {
+          'Content-Type': 'multipart/form-data', // Important! This sets the content type to multipart/form-data
+          'authorization': token,
+        },
+      });
     } catch (error) {
       console.error('Error posting comment:', error);
     }
@@ -147,26 +158,26 @@ const renderPost = ({ item }) => {
       <Text style={styles.description}>Location: {item.title}</Text>
       <Text style={styles.description}>Description: {item.content}</Text>
       {/* Render comments */}
-      {comments[item.id]?.slice(0, showAllComments || expandedComments.includes(item.id) ? undefined : 2).map((comment, index) => (
+      {comments[item._id]?.slice(0, showAllComments || expandedComments.includes(item._id) ? undefined : 2).map((comment, index) => (
         <Text key={index} style={styles.commentText}>
           {comment}
         </Text>
       ))}
       {/* Render the expand/shrink icon */}
-      {comments[item.id]?.length > 2 && (
-        <TouchableOpacity onPress={() => toggleComments(item.id)}>
-          <Icon name={expandedComments.includes(item.id) ? "up" : "down"} style={styles.buttonIcon} />
+      {comments[item._id]?.length > 2 && (
+        <TouchableOpacity onPress={() => toggleComments(item._id)}>
+          <Icon name={expandedComments.includes(item._id) ? "up" : "down"} style={styles.buttonIcon} />
         </TouchableOpacity>
       )}
       <View style={styles.buttonContainer}>
-        <TouchableOpacity onPress={() => handleLike(item.id)}>
+        <TouchableOpacity onPress={() => handleLike(item._id)}>
           <Icon name="like1" style={styles.buttonIcon} />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleComment(item.id)}>
+        <TouchableOpacity onPress={() => handleComment(item._id)}>
           <Icon name="message1" style={styles.buttonIcon} />
         </TouchableOpacity>
       </View>
-      {openCommentPostId === item.id && (
+      {openCommentPostId === item._id && (
         <View style={styles.commentContainer}>
           <TextInput
             style={styles.commentInput}
@@ -174,7 +185,7 @@ const renderPost = ({ item }) => {
             value={commentText}
             onChangeText={setCommentText}
           />
-          <TouchableOpacity onPress={() => handlePostComment(item.id)}>
+          <TouchableOpacity onPress={() => handlePostComment(item._id)}>
             <Text style={styles.postCommentButton}>Post</Text>
           </TouchableOpacity>
         </View>
@@ -187,7 +198,7 @@ return (
   <View>
     <FlatList
       data={posts} // Use fetched posts instead of staticPosts
-      keyExtractor={(item) => item.toString()}
+      keyExtractor={(item) => item._id}
       renderItem={renderPost}
     />
   </View>

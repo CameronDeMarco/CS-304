@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, Image, TouchableOpacity, StyleSheet, Dimensions, TextInput, Keyboard } from 'react-native';
+import { View, Text, FlatList, Image, TouchableOpacity, StyleSheet, Dimensions, TextInput, Keyboard, RefreshControl } from 'react-native';
 import Carousel from 'react-native-reanimated-carousel';
 import Icon from 'react-native-vector-icons/AntDesign';
 import AsyncStorage from '@react-native-async-storage/async-storage'; 
@@ -13,6 +13,7 @@ const FeedPage = () => {
   const [expandedComments, setExpandedComments] = useState([]); // Track expanded comments
   const [showAllComments, setShowAllComments] = useState(false);
   const [posts, setPosts] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
 
 
   useEffect(() => {
@@ -24,6 +25,11 @@ const FeedPage = () => {
     saveComments();
   }, [comments]);
 
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchPosts().then(() => setRefreshing(false));
+  };
+
   const fetchPosts = async () => {
     try {
       const response = await axios.get('http://10.20.148.198:5001/api/post/posts');
@@ -33,27 +39,40 @@ const FeedPage = () => {
     }
   };
 
-  const handleLike = (postId) => {
-    console.log(`Liked post ${postId}`);
-  };
-
-  const handleComment = (postId) => {
-    setOpenCommentPostId((prevId) => (prevId !== postId ? postId : null));
-  };
-
-  const handlePostComment = async (postId) => {
+  const handleLike = async (postId) => {
     try {
-      const postComments = comments[postId] || [];
-      const updatedComments = [...postComments, commentText];
-      setComments({ ...comments, [postId]: updatedComments });
+      console.log(`Liked post ${postId}`);
+      // Here you can make a request to your backend API to handle the like action for the specific post
+      await axios.post(`http://localhost:5001/api/post/posts/${postId}/like`);
+      // You might want to update the state or perform any other action upon successful like
+    } catch (error) {
+      console.error('Error liking post:', error);
+    }
+  };
 
+  const handleComment = (_id) => {
+    setOpenCommentPostId((prevId) => (prevId !== _id ? _id : null)); // Open or close the clicked post's comment box
+    if (openCommentPostId !== _id && openCommentPostId !== null) {
+      // If another comment box is open and it's not the clicked post's comment box, close it
+      Keyboard.dismiss(); // Dismiss the keyboard if open
+    }
+  };
+
+  const handlePostComment = async (postId) => { // Change parameter name to postId
+    try {
+      const postComments = comments[postId] || []; // Use postId instead of item._id
+      const updatedComments = [...postComments, commentText];
+      setComments({ ...comments, [postId]: updatedComments }); // Use postId instead of item._id
+  
       setCommentText('');
-      setOpenCommentPostId(null); // Reset the open comment post ID
+      setOpenCommentPostId(null);
       Keyboard.dismiss();
     } catch (error) {
       console.error('Error posting comment:', error);
     }
   };
+  
+  
 
   const loadComments = async () => {
     try {
@@ -75,12 +94,12 @@ const FeedPage = () => {
   };
 
 // Function toggeles whether the comments are expanded or not
-  const toggleComments = (postId) => {
-    if (expandedComments.includes(postId)) {
-      setExpandedComments((prev) => prev.filter((id) => id !== postId));
+  const toggleComments = (_id) => {
+    if (expandedComments.includes(_id)) {
+      setExpandedComments((prev) => prev.filter((id) => id !== _id));
       setShowAllComments(false); // Collapse comments and set showAllComments to false
     } else {
-      setExpandedComments((prev) => [...prev, postId]);
+      setExpandedComments((prev) => [...prev, _id]);
       setShowAllComments(true); // Expand comments and set showAllComments to true
     }
   };
@@ -96,7 +115,7 @@ const renderPost = ({ item }) => {
           height={Dimensions.get('window').width / 1.6}
           autoPlay={false}
           // image
-          data={item.mediaFile.map(uploads => ({ uri: `http://10.20.148.198:5001/uploads/${uploads}` }))} // Construct image URIs
+          data={item.mediaFile.map(uploads => ({ uri: `http://localhost:5001/uploads/${uploads}` }))} // Construct image URIs
           scrollAnimationDuration={800}
           gestureActiveMultiplier={10} // Adjust this value (default is 1)
           gestureVelocityImpact={0.1} // Adjust this value (default is 0.1)
@@ -113,14 +132,14 @@ const renderPost = ({ item }) => {
       <Text style={styles.description}>Location: {item.title}</Text>
       <Text style={styles.description}>Description: {item.content}</Text>
       {/* Render comments */}
-      {comments[item.id]?.slice(0, showAllComments || expandedComments.includes(item.id) ? undefined : 2).map((comment, index) => (
+      {comments[item._id]?.slice(0, showAllComments || expandedComments.includes(item._id) ? undefined : 2).map((comment, index) => (
         <Text key={index} style={styles.commentText}>
           {comment}
         </Text>
       ))}
       {/* Render the expand/shrink icon */}
-      {comments[item.id]?.length > 2 && (
-        <TouchableOpacity onPress={() => toggleComments(item.id)}>
+      {comments[item._id]?.length > 2 && (
+        <TouchableOpacity onPress={() => toggleComments(item._id)}>
           <Icon name={expandedComments.includes(item.id) ? "up" : "down"} style={styles.buttonIcon} />
         </TouchableOpacity>
       )}
@@ -128,23 +147,24 @@ const renderPost = ({ item }) => {
         <TouchableOpacity onPress={() => handleLike(item.id)}>
           <Icon name="like1" style={styles.buttonIcon} />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleComment(item.id)}>
+        <TouchableOpacity onPress={() => handleComment(item._id)}>
           <Icon name="message1" style={styles.buttonIcon} />
         </TouchableOpacity>
       </View>
-      {openCommentPostId === item.id && (
-        <View style={styles.commentContainer}>
-          <TextInput
-            style={styles.commentInput}
-            placeholder="Write a comment..."
-            value={commentText}
-            onChangeText={setCommentText}
-          />
-          <TouchableOpacity onPress={() => handlePostComment(item.id)}>
-            <Text style={styles.postCommentButton}>Post</Text>
-          </TouchableOpacity>
-        </View>
-      )}
+      {openCommentPostId === item._id && (
+  <View style={styles.commentContainer}>
+    <TextInput
+      style={styles.commentInput}
+      placeholder="Write a comment..."
+      value={commentText}
+      onChangeText={setCommentText}
+    />
+    <TouchableOpacity onPress={() => handlePostComment(item._id)}>
+      <Text style={styles.postCommentButton}>Post</Text>
+    </TouchableOpacity>
+  </View>
+)}
+
     </View>
   );
 };
@@ -153,8 +173,12 @@ return (
   <View>
     <FlatList
       data={posts}
-      keyExtractor={(item) => (item && item.id ? item.id.toString() : Math.random().toString())}
+      keyExtractor={(item) => (item && item._id ? item._id.toString() : Math.random().toString())}
       renderItem={renderPost}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      // data={posts}
+      // keyExtractor={(item) => item.postId}
+      // renderItem={renderPost}
     />
   </View>
 );

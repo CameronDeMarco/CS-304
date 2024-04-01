@@ -5,6 +5,7 @@ const PORT = 5001;
 const app = express();
 app.use(express());
 app.use(express.json());
+app.use('/uploads', express.static('uploads'));
 
 const UserRoutes = require('./api/user')
 const PostRoutes = require('./api/post')

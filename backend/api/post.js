@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Post = require('../models/post');
+const Comment = require('../models/comment');
 const jwt = require('jsonwebtoken');
 const Auth = require('../api/Auth');
 const multer = require('multer');
@@ -49,14 +50,27 @@ router.post('/posts/:postId/comments', Auth.authenticate, async (req, res) => {
     try {
         const { postId } = req.params;
         const { comment } = req.body;
-        console.log(req.body);
+        console.log("postId: " + postId + " Comment: " + comment);
         const username = req.headers['authorization'].username;
         // Logic to update the post in the database to add the comment
-        const newComment = new Comment({ postId, username, comment });
+        const newComment = new Comment({ postID: postId, username, comment });
         await newComment.save()
         res.status(200).json({ message: 'Comment posted successfully' });
     } catch (error) {
         console.error('Error posting comment:', error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+});
+
+// Get a post's comments
+router.get('/posts/:postId/comments', async (req, res) => {
+    try {
+        const { postId } = req.params;
+        const comments = await Comment.find({'postID': postId}, 'comment');
+        console.log("test:" + comments);
+        res.json({ comments });
+    } catch (error) {
+        console.error('Error fetching comments:', error);
         res.status(500).json({ message: 'Server Error' });
     }
 });

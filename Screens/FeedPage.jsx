@@ -5,42 +5,6 @@ import Icon from 'react-native-vector-icons/AntDesign';
 import AsyncStorage from '@react-native-async-storage/async-storage'; 
 import axios from 'axios';
 
-// const staticPosts = [
-//   {
-//     id: 1,
-//     username: 'JohnDoe',
-//     images: [
-//       { uri: 'https://adventuresofaplusk.com/wp-content/uploads/2022/01/DSC05615-683x1024.jpg' },
-//       { uri: 'https://media.istockphoto.com/id/1672317574/photo/ama-dablam-mountain-peak.webp?b=1&s=170667a&w=0&k=20&c=Ea8yDEHpUemrRuMZUKGPDBE11YTWVksIupMN8FkEBf8=' },
-//     ],
-//     location: 'Mt Willard White Mountains',
-//     description: 'This is the first post.',
-//     comments: [],
-//   },
-//   {
-//     id: 2,
-//     username: 'JaneSmith',
-//     images: [
-//       { uri: 'https://www.travel-experience-live.com/wp-content/uploads/2014/07/P6186575-2.jpg?x46828' },
-//       { uri: 'https://www.travel-experience-live.com/wp-content/uploads/2014/07/P6186575-2.jpg?x46828' },
-//     ],  
-//     location: 'Flume',
-//     description: 'Another post here.',
-//     comments: [],
-//   },
-//   {
-//     id: 3,
-//     username: 'Smith',
-//     images: [
-//       { uri: 'https://media.istockphoto.com/id/1672317574/photo/ama-dablam-mountain-peak.webp?b=1&s=170667a&w=0&k=20&c=Ea8yDEHpUemrRuMZUKGPDBE11YTWVksIupMN8FkEBf8=' },
-//       { uri: 'https://www.travel-experience-live.com/wp-content/uploads/2014/07/P6186575-2.jpg?x46828' },
-//     ],   
-//     location: 'Mountain',
-//     description: 'Another post here.',
-//     comments: [],
-//   },
-// ];
-
 const FeedPage = () => {
   const [commentText, setCommentText] = useState('');
   const [openCommentPostId, setOpenCommentPostId] = useState(null); // Track the post ID for open comment box
@@ -92,7 +56,6 @@ const FeedPage = () => {
         comment: commentText,
       },{
         headers: {
-          'Content-Type': 'multipart/form-data', // Important! This sets the content type to multipart/form-data
           'authorization': token,
         },
       });
@@ -102,6 +65,23 @@ const FeedPage = () => {
   };
 
   const loadComments = async () => {
+    console.log("tesat");
+    posts.map(async (post) => {
+      try{
+        console.log('http://10.0.0.87:5001/api/posts/'+post._id+'/comments');
+        const response = await axios.get('http://10.0.0.87:5001/api/post/posts/'+post._id+'/comments');
+        response.data.comments.map((comment) => {
+          console.log(comment.comment);
+          setComments({ ...comments, [0]: comment.comment})
+        });
+       // setComments({ ...comments, [postId]: responce.data });
+      } catch (error) {
+        console.error('Error loading comment:', error);
+      }
+    });
+  };
+
+  /*const loadComments = async () => {
     try {
       const storedComments = await AsyncStorage.getItem('comments');
       if (storedComments !== null) {
@@ -110,7 +90,7 @@ const FeedPage = () => {
     } catch (error) {
       console.error('Error loading comments from AsyncStorage:', error);
     }
-  };
+  };*/
 
   const saveComments = async () => {
     try {

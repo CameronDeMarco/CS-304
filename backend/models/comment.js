@@ -19,7 +19,7 @@ const commentSchema = new Schema({
     type: Date,
     default: Date.now,
   },
-}, { collection: 'posts' });
+}, { collection: 'comments' });
 
 const comment = mongoose.model("comments", commentSchema);
 module.exports = comment;

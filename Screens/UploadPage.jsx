@@ -53,7 +53,7 @@ const UploadPage = () => {
                 name: item.fileName,
                 type: item.type,
             }));
-            const uploadResponse = await axios.postForm('http://10.20.148.198:5001/api/post/upload', uploadForm, {
+            const uploadResponse = await axios.postForm('http://10.20.148.206:5001/api/post/upload', uploadForm, {
                 headers: {
                   'Content-Type': 'multipart/form-data', // Important! This sets the content type to multipart/form-data
                   'authorization': token,

@@ -9,10 +9,9 @@ import {
   Alert,
   StyleSheet,
 } from "react-native";
-import { useTheme } from "@react-navigation/native";
+import { NavigationContainer, useTheme, useNavigation, CommonActions } from '@react-navigation/native';
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
-import { MaterialIcons } from "@expo/vector-icons";
 import { TabView, TabBar, SceneMap } from "react-native-tab-view";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as ImagePicker from "expo-image-picker";
@@ -50,6 +49,7 @@ const renderScene = SceneMap({
 const AccountPage = () => {
   const theme = useTheme();
   const layout = useWindowDimensions();
+  const navigation = useNavigation();
   const [index, setIndex] = useState(0);
   const [auth, setAuth] = useState(false);
   const [message, setMessage] = useState('');
@@ -59,15 +59,15 @@ const AccountPage = () => {
   const [backgroundPicture, setBackgroundPicture] = useState(null);
   const [profileImageUri, setProfileImageUri] = useState('assets/images/logo.png');
   const [backgroundImageUri, setBackgroundImageUri] = useState('assets/images/cover.jpg');
-  const [profileImageInfo, setProfileImageInfo] = useState(null);
-  const [backgroundImageInfo, setBackgroundImageInfo] = useState(null);
+  const [profilePictureUrl, setProfilePictureUrl] = useState(null);
+  const [backgroundPictureUrl, setBackgroundPictureUrl] = useState(null);
 
   useEffect(() => {
     // Retrieve the token from AsyncStorage
     AsyncStorage.getItem('token')
       .then(token => {
         // Make a request to the server endpoint with the token in the Authorization header
-        axios.get('http://10.20.148.198:5001/api/user', {
+        axios.get('http://10.20.148.206:5001/api/user', {
           headers: {
             Authorization: `Bearer ${token}` // Include the token in the Authorization header
           }
@@ -78,12 +78,13 @@ const AccountPage = () => {
               setAuth(true);
               setUserId(res.data.userId);
               setUsername(res.data.username);
-              fetchUserImages();
+              fetchUserImages(token);
               console.log("User id ", res.data.userId);
               console.log("Username ", res.data.username);
             } else {
               // Authentication failed, handle the error message
               setAuth(false);
+              console.log("token: " + token);
               setMessage(res.data.Error);
             }
           })
@@ -92,23 +93,60 @@ const AccountPage = () => {
       .catch(error => console.error('Error retrieving token:', error)); // Handle AsyncStorage error
   }, []);
 
-  const fetchUserImages = async () => {
+  const handleLogout = () => {
+    try {
+      console.log("executing...")
+      AsyncStorage.removeItem("token");
+      setAuth(false);
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{ name: 'Main' }],
+        })
+      );
+      Alert.alert(`Successfully logged out`);
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
+  };
+
+  const addProfilePicture = (fileName, uri, type) => {
+    setProfilePicture({ fileName:fileName, uri:uri, type:type });
+    console.log(type);
+  };
+
+  const addBackgroundPicture = (fileName, uri, type) => {
+    setBackgroundPicture({ fileName:fileName, uri:uri, type:type });
+    console.log(type);
+  };
+
+  const fetchUserImages = async (token) => {
     try {
       // Fetch profile picture
-      const profileResponse = await axios.get(`http://10.20.148.198:5001/api/user/profile-picture`);
+      const profileResponse = await axios.get(`http://10.20.148.206:5001/api/user/profile-picture`, {
+        headers: {
+          'authorization': token,
+        },
+      });
       if (profileResponse.status === 200) {
-        setProfilePicture(profileResponse.data.imageUrl);
+        setProfilePictureUrl(profileResponse.data.imageUrl);
+        console.log(profilePictureUrl);
       } else {
-        setProfilePicture(null);
+        setProfilePictureUrl(null);
         console.error('Error fetching profile picture. Status:', profileResponse.status);
       }
 
       // Fetch background picture
-      const backgroundResponse = await axios.get(`http://10.20.148.198:5001/api/user/background-picture`);
+      const backgroundResponse = await axios.get(`http://10.20.148.206:5001/api/user/background-picture`, {
+        headers: {
+          'authorization': token,
+        },
+      });
       if (backgroundResponse.status === 200) {
-        setBackgroundPicture(backgroundResponse.data.imageUrl);
+        setBackgroundPictureUrl(backgroundResponse.data.imageUrl);
+        console.log(backgroundPictureUrl);
       } else {
-        setBackgroundPicture(null);
+        setBackgroundPictureUrl(null);
         console.error('Error fetching background picture. Status:', backgroundResponse.status);
       }
     } catch (error) {
@@ -116,42 +154,37 @@ const AccountPage = () => {
     }
   };
 
-  const pickImage = async (type) => {
+  async function pickImage (type) {
     try {
       let result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         aspect: [4, 3],
         quality: 1,
       });
 
-      console.log(result);
-
       if (!result.cancelled) {
         if (type === 'profile') {
-          setProfilePicture(result.uri);
-          const profileLocalUri = result.uri;
-          const profileFileName = profileLocalUri.split('/').pop();
-          const profileFileType = profileLocalUri.split('.').pop();
-          const profileImageInfo = { profileFileName, profileFileType };
-          setProfileImageInfo(profileImageInfo);
-          uploadProfilePicture(result.uri);
+          const fileName = result.assets[0].fileName || 'Cropped-Image.jpg';
+          console.log(fileName + " selected.");
+          addProfilePicture(fileName, result.assets[0].uri, result.assets[0].mimeType);
+          uploadProfilePicture();
+          console.log(result.assets[0]);
         } else if (type === 'background') {
-          setBackgroundPicture(result.uri);
-          const backgroundLocalUri = result.uri;
-          const backgroundFileName = backgroundLocalUri.split('/').pop();
-          const backgroundFileType = backgroundLocalUri.split('.').pop();
-          const backgroundImageInfo = { backgroundFileName, backgroundFileType };
-          setBackgroundImageInfo(backgroundImageInfo);
-          uploadBackgroundPicture(result.uri);
-        }
-      }
+          const fileName = result.assets[0].fileName || 'Cropped-Image.jpg';
+          console.log(fileName + " selected.");
+          addBackgroundPicture(fileName, result.assets[0].uri, result.assets[0].mimeType);
+          uploadBackgroundPicture();
+          console.log(result.assets[0]);
+        } 
+      } else {
+        console.log("Image selection canceled.");
+    }
     } catch (error) {
       console.error('Error picking image:', error);
     }
   };
 
-  const uploadProfilePicture = async (uri) => {
+  const uploadProfilePicture = async () => {
     let token;
     try {
       token = await AsyncStorage.getItem('token');
@@ -161,15 +194,17 @@ const AccountPage = () => {
     }
     try {
       const formData = new FormData();
-      formData.append('image', {
-        uri,
-        name: profileImageInfo.profileFileName,
-        type: `image/${profileImageInfo.profileFileType}`,
-      });
+      if (profilePicture) {
+        formData.append('image', {
+          uri: profilePicture.uri,
+          name: profilePicture.fileName,
+          type: profilePicture.type,
+        });
+      }
 
       console.log(formData);
 
-      const response = await axios.post(`http://10.20.148.198:5001/api/user/upload-profile-picture`, formData, {
+      const response = await axios.post(`http://10.20.148.206:5001/api/user/upload-profile-picture`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           'authorization': token,
@@ -182,7 +217,7 @@ const AccountPage = () => {
     }
   };
 
-  const uploadBackgroundPicture = async (uri) => {
+  const uploadBackgroundPicture = async () => {
     let token;
     try {
       token = await AsyncStorage.getItem('token');
@@ -192,13 +227,15 @@ const AccountPage = () => {
     }
     try {
       const formData = new FormData();
-      formData.append('image', {
-        uri,
-        name: backgroundImageInfo.backgroundFileName,
-        type: `image/${backgroundImageInfo.backgroundFileType}`
-      });
+      if (backgroundPicture) {
+        formData.append('image', {
+          uri: backgroundPicture.uri,
+          name: backgroundPicture.fileName,
+          type: backgroundPicture.type,
+        });
+      }
 
-      const response = await axios.post(`http://10.20.148.198:5001/api/user/upload-background-picture`, formData, {
+      const response = await axios.post(`http://10.20.148.206:5001/api/user/upload-background-picture`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           'authorization': token,
@@ -239,17 +276,47 @@ const AccountPage = () => {
         flex: 1,
         backgroundColor: "#ffffff",
       }}
+      edges={['bottom']}
     >
       <StatusBar backgroundColor="#808080" />
-      <View>
+      <View style={{ position: 'relative', flex: 1 }}>
         <Image
-          source={backgroundPicture ? { uri: `http://10.20.148.198:5001/uploads/${backgroundPicture}` } : { uri: backgroundImageUri }}
+          source={backgroundPictureUrl ? { uri: `http://10.20.148.206:5001/uploads/${backgroundPictureUrl}` } : { uri: backgroundImageUri }}
           resizeMode="cover"
           style={{
             height: 228,
             width: "100%",
           }}
         />
+        {!auth ? (
+          null
+        ) : (
+          <TouchableOpacity
+            title="Logout"
+            onPress={handleLogout}
+            style={{
+              position: 'absolute',
+              top: 10,
+              right: 0,
+              width: 100,
+              height: 36,
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: theme.colors.button,
+              borderRadius: 99,
+              marginHorizontal: 10 * 2,
+            }}
+          >
+            <Text style={{
+                fontWeight: 'normal',
+                fontSize: 14,
+                lineHeight: 20,
+                color: "#ffffff",
+              }}>
+                Logout
+            </Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       <View style={{ flex: 1, alignItems: "center", }}>
@@ -262,7 +329,7 @@ const AccountPage = () => {
             borderWidth: 2,
             marginTop: -90,
           }}
-          source={profilePicture ? { uri: `http://10.20.148.198:5001/uploads/${profilePicture}` } : { uri: profileImageUri }}
+          source={profilePictureUrl ? { uri: `http://10.20.148.206:5001/uploads/${profilePictureUrl}` } : { uri: profileImageUri }}
           resizeMode="contain"
         />
 

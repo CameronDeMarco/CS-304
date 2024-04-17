@@ -49,9 +49,9 @@ const TabNavigator = () => {
           }
           return <Feather name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: theme.colors.primary,
-        tabBarInactiveTintColor: 'gray',
-        tabBarStyle: [{ display: 'flex' }, null],
+        tabBarActiveTintColor: 'white',
+        tabBarInactiveTintColor: theme.colors.tabBarIcon,
+        tabBarStyle: [{ display: 'flex', backgroundColor: theme.colors.primary }, null],
       })}
     >
       <Tab.Screen

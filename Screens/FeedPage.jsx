@@ -32,7 +32,7 @@ const FeedPage = () => {
 
   const fetchPosts = async () => {
     try {
-      const response = await axios.get('http://10.20.148.206:5001/api/post/posts');
+      const response = await axios.get('http://10.0.0.10:5001/api/post/posts');
       setPosts(response.data.posts);
     } catch (error) {
       console.error('Error fetching posts:', error);
@@ -43,7 +43,7 @@ const FeedPage = () => {
     try {
       console.log(`Liked post ${postId}`);
       // Here you can make a request to your backend API to handle the like action for the specific post
-      await axios.post(`http://10.20.148.206:5001/api/post/posts/${postId}/like`);
+      await axios.post(`http://10.0.0.10:5001/api/post/posts/${postId}/like`);
       // You might want to update the state or perform any other action upon successful like
     } catch (error) {
       console.error('Error liking post:', error);
@@ -115,7 +115,7 @@ const renderPost = ({ item }) => {
           height={Dimensions.get('window').width / 1.6}
           autoPlay={false}
           // image
-          data={item.mediaFile.map(uploads => ({ uri: `http://10.20.148.206:5001/uploads/${uploads}` }))} // Construct image URIs
+          data={item.mediaFile.map(uploads => ({ uri: `http://10.0.0.10:5001/uploads/${uploads}` }))} // Construct image URIs
           scrollAnimationDuration={800}
           gestureActiveMultiplier={10} // Adjust this value (default is 1)
           gestureVelocityImpact={0.1} // Adjust this value (default is 0.1)

@@ -25,7 +25,7 @@ const Login = ({ navigation }) => {
   const handleLogin = async () => {
     try {
       // Send login request to backend
-      const response = await axios.post('http://10.20.148.206:5001/api/user/login', {
+      const response = await axios.post('http://10.0.0.10:5001/api/user/login', {
         username,
         password
       });

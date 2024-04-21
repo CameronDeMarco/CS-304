@@ -32,7 +32,7 @@ const FeedPage = () => {
 
   const fetchPosts = async () => {
     try {
-      const response = await axios.get('http://10.20.148.198:5001/api/post/posts');
+      const response = await axios.get('http://localhost:5001/api/post/posts');
       setPosts(response.data.posts);
     } catch (error) {
       console.error('Error fetching posts:', error);
@@ -42,9 +42,25 @@ const FeedPage = () => {
   const handleLike = async (postId) => {
     try {
       console.log(`Liked post ${postId}`);
-      // Here you can make a request to your backend API to handle the like action for the specific post
-      await axios.post(`http://10.20.148.198:5001/api/post/posts/${postId}/like`);
-      // You might want to update the state or perform any other action upon successful like
+      // Get the authentication token from AsyncStorage
+      const authToken = await AsyncStorage.getItem('token');
+      console.log(authToken);
+      // Set up request headers with the authentication token
+      const headers = {
+        'Authorization': authToken,
+        'Content-Type': 'application/json',
+      };
+      // Send a POST request to like the post
+      await axios.post(
+        `http://localhost:5001/api/post/posts/${postId}/like`,
+        {},
+        {
+          headers: headers
+        }
+      );
+  
+      // Update the posts after successful like
+      fetchPosts();
     } catch (error) {
       console.error('Error liking post:', error);
     }
@@ -115,7 +131,7 @@ const renderPost = ({ item }) => {
           height={Dimensions.get('window').width / 1.6}
           autoPlay={false}
           // image
-          data={item.mediaFile.map(uploads => ({ uri: `http://10.20.148.198:5001/uploads/${uploads}` }))} // Construct image URIs
+          data={item.mediaFile.map(uploads => ({ uri: `http://localhost:5001/uploads/${uploads}` }))} // Construct image URIs
           scrollAnimationDuration={800}
           gestureActiveMultiplier={10} // Adjust this value (default is 1)
           gestureVelocityImpact={0.1} // Adjust this value (default is 0.1)
@@ -144,9 +160,11 @@ const renderPost = ({ item }) => {
         </TouchableOpacity>
       )}
       <View style={styles.buttonContainer}>
-        <TouchableOpacity onPress={() => handleLike(item.id)}>
+        <TouchableOpacity onPress={() => handleLike(item._id)}>
           <Icon name="like1" style={styles.buttonIcon} />
         </TouchableOpacity>
+        {/* like Counter */}
+        {item.likes.length > 0 && <Text style={styles.likeCount}>{item.likes.length} </Text>}
         <TouchableOpacity onPress={() => handleComment(item._id)}>
           <Icon name="message1" style={styles.buttonIcon} />
         </TouchableOpacity>
@@ -242,6 +260,11 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     color: '#333',
   },
+  likeCount: {
+    marginTop: 10,
+    marginRight: 280,
+    color: "#CD553B",
+  }
 });
 
 export default FeedPage;

@@ -17,8 +17,12 @@ const postSchema = new Schema({
   },
   mediaFile: [{
     type: String,
-    sparce: true,
+    sparse: true,
   }],
+  likes: {
+    type: [String], // Array to store user IDs who liked the post
+    default: [] // Default value is an empty array
+},
   createdAt: {
     type: Date,
     default: Date.now,

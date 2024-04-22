@@ -19,6 +19,7 @@ export const useDarkMode = () => {
         inputField: 'grey',
         popup: 'black',
         icon: '#CD553B',
+        tabBarIcon: '#808080'
     },
     };
     const CustomLightTheme = {
@@ -35,6 +36,7 @@ export const useDarkMode = () => {
         inputField: 'White',
         popup: 'white',
         icon: '#CD553B',
+        tabBarIcon: '#803c2f'
     },
     };
 

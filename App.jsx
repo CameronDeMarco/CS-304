@@ -12,61 +12,23 @@ import { Feather } from '@expo/vector-icons';
 import { primaryColor } from './Components/Color';
 import { useDarkMode  } from './Components/Themes';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-//const Logo = require('./assets/images/logo');
 
 const Logo = () => {
   const theme = useTheme();
-  const logoSource = require('./assets/adaptive-icon.png');
+  const logoSource = 'https://i.ibb.co/gjfLCDQ/Roamr-Logo.png';
   console.log('Logo Source:', logoSource);
   return (
     <Image
-      source={logoSource}
+      source={{uri: logoSource}}
       style={{ 
-        width: 25, 
-        height: 25,
-        borderRadius: 999,
-        borderColor: theme.colors.primary, //red
-        borderWidth: 2,
+        width: 75, 
+        height: 75,
+
       }}
       resizeMode="contain"
     />
   );
 };
-
-const LogoutButton = ({ isLoggedIn, onLogout }) => {
-  const theme = useTheme();
-  return (
-    <View>
-      {!isLoggedIn ? (
-        null
-      ) : (
-        <TouchableOpacity
-          title="Logout"
-          color='#4C6E95'
-          onPress={onLogout}
-          style={{
-            width: 100,
-            height: 36,
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: theme.colors.button,
-            borderRadius: 99,
-            marginHorizontal: 10 * 2,
-          }}
-        >
-          <Text style={{
-              fontWeight: 'normal',
-              fontSize: 14,
-              lineHeight: 20,
-              color: "#ffffff",
-            }}>
-              Logout
-          </Text>
-        </TouchableOpacity>
-      )}
-    </View>
-  );
-}
 
 const Tab = createBottomTabNavigator();
 
@@ -87,9 +49,9 @@ const TabNavigator = () => {
           }
           return <Feather name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: theme.colors.primary,
-        tabBarInactiveTintColor: 'gray',
-        tabBarStyle: [{ display: 'flex' }, null],
+        tabBarActiveTintColor: 'white',
+        tabBarInactiveTintColor: theme.colors.tabBarIcon,
+        tabBarStyle: [{ display: 'flex', backgroundColor: theme.colors.primary }, null],
       })}
     >
       <Tab.Screen
@@ -165,7 +127,7 @@ export default function App() {
   );
 }
 
-const MainScreen = ({ navigation }) => {
+const MainScreen = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
@@ -181,37 +143,19 @@ const MainScreen = ({ navigation }) => {
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      await AsyncStorage.removeItem("token");
-      setIsLoggedIn(false);
-      navigation.dispatch(
-        CommonActions.reset({
-          index: 0,
-          routes: [{ name: 'Main' }],
-        })
-      );
-      Alert.alert(`Successfully logged out`);
-    } catch (error) {
-      console.error("Error logging out:", error);
-    }
-  };
-
   return (
     <Stack.Navigator>
       {isLoggedIn ? (
         <Stack.Screen
           name="TabNavigator"
           component={TabNavigator}
-          initialParams={{ isLoggedIn: true }} // Pass the login status as a parameter
+          initialParams={{ isLoggedIn: false }}
           options={{
-            headerRight: () => <LogoutButton isLoggedIn={isLoggedIn} onLogout={handleLogout} />,
-            headerLeft: null, // Hide the header left component
             headerTitle: '',
-            headerShown: true,
+            headerShown: false,
             headerStyle: {
-              borderBottomWidth: 0, // Remove the border
-              backgroundColor: 'transparent', // Set background color if needed
+              borderBottomWidth: 0,
+              backgroundColor: 'transparent',
             }
           }}
         />

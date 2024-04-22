@@ -12,7 +12,7 @@ const Register = ({ navigation }) => {
 
   const handleCreateAccount = async () => {
     try {
-      const response = await axios.post('http://10.20.148.198:5001/api/user/register', {
+      const response = await axios.post('http://10.0.0.10:5001/api/user/register', {
         firstName,
         lastName,
         username,

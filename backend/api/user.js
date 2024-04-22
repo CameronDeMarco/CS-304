@@ -49,7 +49,7 @@ router.post('/login', async (req, res) => {
       }
   
       // Generate JWT token
-      const token = jwt.sign({ userId: user._id, username: user.username }, 'your-secret-key', { expiresIn: '1h' });
+      const token = jwt.sign({ userId: user._id, username: user.username }, 'your-secret-key', { expiresIn: '1d' });
   
       // Send JWT token to the client
       console.log("successfully logged in as", user.username);
@@ -119,7 +119,7 @@ const upload = multer({ storage: storage });
 router.post('/upload-profile-picture', [Auth.authenticate, upload.single("image")], async (req, res) => {
   try {
     const username = req.headers['authorization'].username;
-      const imageName = path.basename(req.file.path);
+      const imageName = req.file.filename;
       console.log(username + " uploaded media: " + imageName);
       
       await User.findOneAndUpdate(
@@ -136,7 +136,7 @@ router.post('/upload-profile-picture', [Auth.authenticate, upload.single("image"
 router.post('/upload-background-picture', [Auth.authenticate, upload.single("image")], async (req, res) => {
   try {
     const username = req.headers['authorization'].username;
-      const imageName = path.basename(req.file.path);
+    const imageName = req.file.filename;
       console.log(username + " uploaded media: " + imageName);
       
       await User.findOneAndUpdate(

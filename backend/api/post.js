@@ -66,7 +66,7 @@ router.post('/posts/:postId/comments', Auth.authenticate, async (req, res) => {
 router.get('/posts/:postId/comments', async (req, res) => {
     try {
         const { postId } = req.params;
-        const comments = await Comment.find({'postID': postId}, 'comment');
+        const comments = await Comment.find({'postID': postId}, 'comment postID');
         console.log("test:" + comments);
         res.json({ comments });
     } catch (error) {

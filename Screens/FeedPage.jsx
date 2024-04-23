@@ -16,8 +16,11 @@ const FeedPage = () => {
 
   useEffect(() => {
     fetchPosts();
-    loadComments();
   }, []);
+
+  useEffect(() => {
+    loadComments();
+  }, [posts]);
 
   useEffect(() => {
     saveComments();
@@ -26,7 +29,7 @@ const FeedPage = () => {
   const fetchPosts = async () => {
     try {
       const response = await axios.get('http://10.0.0.87:5001/api/post/posts');
-      setPosts(response.data.posts);
+      await setPosts(response.data.posts);
     } catch (error) {
       console.error('Error fetching posts:', error);
     }
@@ -65,16 +68,21 @@ const FeedPage = () => {
   };
 
   const loadComments = async () => {
-    console.log("tesat");
+    try{
+      const storedComments = await AsyncStorage.getItem('comments');
+      console.log(storedComments);
+    } catch (error) {
+      console.error('Error loading comments from AsyncStorage:', error);
+    }
     posts.map(async (post) => {
       try{
         console.log('http://10.0.0.87:5001/api/posts/'+post._id+'/comments');
         const response = await axios.get('http://10.0.0.87:5001/api/post/posts/'+post._id+'/comments');
         response.data.comments.map((comment) => {
-          console.log(comment.comment);
-          setComments({ ...comments, [0]: comment.comment})
+          comm = comment.postID + ':' + comment.comment;
+          //console.log(comm);
+          setComments({ ...comments, comm})
         });
-       // setComments({ ...comments, [postId]: responce.data });
       } catch (error) {
         console.error('Error loading comment:', error);
       }
@@ -84,6 +92,7 @@ const FeedPage = () => {
   /*const loadComments = async () => {
     try {
       const storedComments = await AsyncStorage.getItem('comments');
+      console.log(storedComments);
       if (storedComments !== null) {
         setComments(JSON.parse(storedComments));
       }
